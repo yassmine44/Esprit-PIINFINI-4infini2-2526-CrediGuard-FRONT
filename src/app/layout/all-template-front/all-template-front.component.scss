@@ -1,0 +1,9 @@
+.front-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.front-content {
+  flex: 1;
+}

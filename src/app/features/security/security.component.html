@@ -1,0 +1,58 @@
+<div class="security-page">
+  <div class="security-card">
+    <div class="security-header">
+      <h2>Security Settings</h2>
+      <p>Manage your account protection and two-factor authentication.</p>
+    </div>
+
+    <div class="security-info">
+      <span class="label">Email</span>
+      <span class="value">{{ email || 'Not available' }}</span>
+    </div>
+
+    <div class="security-info">
+      <span class="label">Two-Factor Authentication</span>
+      <span
+        class="value status-badge"
+        [class.enabled]="twoFactorEnabled"
+        [class.disabled]="!twoFactorEnabled"
+      >
+        {{ twoFactorEnabled ? 'Enabled' : 'Disabled' }}
+      </span>
+    </div>
+
+    <div class="security-note">
+      <p>
+        When 2FA is enabled, you will need a one-time code after entering your password.
+      </p>
+    </div>
+
+    <div class="actions">
+      <button
+        *ngIf="!twoFactorEnabled"
+        (click)="enable2fa()"
+        [disabled]="loading"
+        class="btn-enable"
+      >
+        {{ loading ? 'Please wait...' : 'Enable 2FA' }}
+      </button>
+
+      <button
+        *ngIf="twoFactorEnabled"
+        (click)="disable2fa()"
+        [disabled]="loading"
+        class="btn-disable"
+      >
+        {{ loading ? 'Please wait...' : 'Disable 2FA' }}
+      </button>
+    </div>
+
+    <div *ngIf="message" class="success-msg">
+      {{ message }}
+    </div>
+
+    <div *ngIf="errorMessage" class="error-msg">
+      {{ errorMessage }}
+    </div>
+  </div>
+</div>

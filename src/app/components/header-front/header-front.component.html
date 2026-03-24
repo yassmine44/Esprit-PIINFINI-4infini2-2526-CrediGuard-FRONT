@@ -1,0 +1,40 @@
+<nav class="navbar">
+  <div class="auth-actions">
+    <ng-container *ngIf="authService.isLoggedIn()">
+      <button type="button" class="btn-auth outline" (click)="logout()">Logout</button>
+    </ng-container>
+  </div>
+
+  <a routerLink="/" class="brand">
+    <div class="logo-icon">/</div>
+    CREDIGUARD
+  </a>
+
+  <ul class="nav-links">
+    <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
+    <li><a routerLink="/about" routerLinkActive="active">About</a></li>
+    <li><a routerLink="/contact" routerLinkActive="active">Contact</a></li>
+
+    <li><a routerLink="/credit" routerLinkActive="active">Credit</a></li>
+    <li><a routerLink="/crowdfunding" routerLinkActive="active">Crowdfunding</a></li>
+    <li><a routerLink="/finance" routerLinkActive="active">Finance</a></li>
+    <li><a routerLink="/partnership" routerLinkActive="active">Partnership</a></li>
+    <li><a routerLink="/events" routerLinkActive="active">Events</a></li>
+    <li><a routerLink="/ecommerce" routerLinkActive="active">E-Commerce</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button
+      *ngIf="authService.isLoggedIn()"
+      type="button"
+      class="icon-btn"
+      (click)="goProfile()"
+      aria-label="Profile">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+
+    <button type="button" class="icon-btn btn-notify" aria-label="Notifications">
+      <mat-icon>notifications</mat-icon>
+    </button>
+  </div>
+</nav>
