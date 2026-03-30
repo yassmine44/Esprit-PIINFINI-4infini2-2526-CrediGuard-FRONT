@@ -1,0 +1,67 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Créer un Service de Transport</h2>
+    <button class="btn btn-secondary" (click)="cancel()">
+      <i class="fas fa-arrow-left"></i> Retour
+    </button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <form [formGroup]="transportForm" (ngSubmit)="onSubmit()">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">ID Événement *</label>
+            <input type="number" class="form-control" formControlName="eventId">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Type de transport *</label>
+            <select class="form-select" formControlName="transportType">
+              <option value="">Sélectionner</option>
+              <option *ngFor="let type of transportTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Lieu de départ *</label>
+          <input type="text" class="form-control" formControlName="departurePlace">
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Heure de départ *</label>
+            <input type="datetime-local" class="form-control" formControlName="departureTime">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Heure de retour *</label>
+            <input type="datetime-local" class="form-control" formControlName="returnTime">
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Capacité *</label>
+            <input type="number" class="form-control" formControlName="capacity">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Statut *</label>
+            <select class="form-select" formControlName="status">
+              <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Annuler</button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            Créer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,70 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Détail de l'Événement</h2>
+    <button class="btn btn-secondary" (click)="cancel()">
+      <i class="fas fa-arrow-left"></i> Retour
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="event && !loading" class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h3>{{ event.title }}</h3>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Type:</strong> {{ event.eventType }}
+            </div>
+            <div class="col-md-6">
+              <strong>Statut:</strong> <span [class]="getStatusClass(event.status)">{{ event.status }}</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <strong>Description:</strong>
+            <p>{{ event.description }}</p>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Lieu:</strong> {{ event.location }}
+            </div>
+            <div class="col-md-6">
+              <strong>Capacité:</strong> {{ event.capacity }} places
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Début:</strong> {{ event.dateStart | date:'full' }}
+            </div>
+            <div class="col-md-6">
+              <strong>Fin:</strong> {{ event.dateEnd | date:'full' }}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <div>
+              <button class="btn btn-warning me-2" 
+                      [routerLink]="['/admin/events', event.id, 'edit']">
+                <i class="fas fa-edit"></i> Modifier
+              </button>
+              <button class="btn btn-danger" (click)="deleteEvent()">
+                <i class="fas fa-trash"></i> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
