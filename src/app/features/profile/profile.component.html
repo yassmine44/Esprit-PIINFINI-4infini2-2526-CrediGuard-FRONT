@@ -1,0 +1,74 @@
+<div class="profile-page" *ngIf="!loading; else loadingTpl">
+  <div class="profile-header">
+    <div>
+      <h1>My Profile</h1>
+      <p>Manage your personal information and account details.</p>
+    </div>
+  </div>
+
+  <div class="profile-layout">
+    <div class="profile-summary-card">
+      <div class="avatar">
+        {{ (profile?.fullName || 'U').charAt(0) }}
+      </div>
+
+      <h2>{{ profile?.fullName }}</h2>
+      <p class="role">{{ profile?.userType }}</p>
+
+      <span
+        class="status-badge"
+        [class.enabled]="profile?.enabled"
+        [class.disabled]="!profile?.enabled"
+      >
+        {{ profile?.enabled ? 'Active' : 'Disabled' }}
+      </span>
+    </div>
+
+    <div class="profile-form-card">
+      <h2>Basic Information</h2>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input id="fullName" type="text" formControlName="fullName" />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" formControlName="email" />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="phone">Phone</label>
+            <input id="phone" type="text" formControlName="phone" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="saving" class="save-btn">
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+
+      <div *ngIf="message" class="success-msg">
+        {{ message }}
+      </div>
+
+      <div *ngIf="errorMessage" class="error-msg">
+        {{ errorMessage }}
+      </div>
+
+      
+
+      
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-box">
+    Loading profile...
+  </div>
+</ng-template>

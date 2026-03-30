@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Add User</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" mat-dialog-content>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Full Name</mat-label>
+    <input matInput formControlName="fullName">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Email</mat-label>
+    <input matInput formControlName="email">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Password</mat-label>
+    <input matInput type="password" formControlName="password">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Role</mat-label>
+    <mat-select formControlName="userType">
+      <mat-option value="CLIENT">Client</mat-option>
+      <mat-option value="AGENT">Agent</mat-option>
+      <mat-option value="ADMIN">Admin</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full">
+    <mat-label>Phone</mat-label>
+    <input matInput formControlName="phone">
+  </mat-form-field>
+
+</form>
+
+<div mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cancel</button>
+  <button mat-raised-button color="primary" type="submit" (click)="submit()">
+    Create
+  </button>
+</div>

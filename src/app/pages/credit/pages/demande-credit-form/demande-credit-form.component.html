@@ -1,0 +1,76 @@
+<section class="credit-form-page">
+  <div class="container">
+    <div class="top-actions">
+      <button type="button" class="back-btn" (click)="goBackToCreditHome()">
+        ← Back to Credit Space
+      </button>
+    </div>
+
+    <div class="page-header">
+      <div class="header-badge">Credit Application</div>
+      <h1>Submit a Credit Request</h1>
+      <p>
+        Complete the form below to submit your financing request for review and approval.
+      </p>
+    </div>
+
+    <div *ngIf="error()" class="message error">{{ error() }}</div>
+    <div *ngIf="success()" class="message success">{{ success() }}</div>
+
+    <div class="form-card">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="typeCredit">Type of Credit</label>
+            <select id="typeCredit" formControlName="typeCredit">
+              <option [ngValue]="null">Select type</option>
+              <option *ngFor="let type of typeCredits" [ngValue]="type">
+                {{ type }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="montantDemande">Requested Amount</label>
+            <input
+              id="montantDemande"
+              type="number"
+              formControlName="montantDemande"
+              placeholder="Enter requested amount"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="dureeMois">Duration (months)</label>
+            <input
+              id="dureeMois"
+              type="number"
+              formControlName="dureeMois"
+              placeholder="Enter duration in months"
+            />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="objetCredit">Purpose of Credit</label>
+            <textarea
+              id="objetCredit"
+              rows="5"
+              formControlName="objetCredit"
+              placeholder="Describe the purpose of your financing request"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-light" (click)="goToHistory()">
+            View My Requests
+          </button>
+
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            {{ saving() ? 'Submitting...' : 'Submit Request' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

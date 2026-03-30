@@ -1,0 +1,43 @@
+<div class="module-page">
+  <div class="module-header">
+    <div>
+      <h1>E-Commerce Management</h1>
+      <p>Manage products, categories, orders, payments, deliveries, and promotions.</p>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Total Products</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Total Orders</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Pending Deliveries</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Active Promotions</span>
+      <h2>0</h2>
+    </div>
+  </div>
+
+  <div class="module-grid">
+    <div class="module-card" *ngFor="let card of cards">
+      <div class="card-top">
+        <h3>{{ card.title }}</h3>
+        <span class="card-badge">{{ card.value }}</span>
+      </div>
+
+      <p>{{ card.description }}</p>
+
+      <button type="button">{{ card.action }}</button>
+    </div>
+  </div>
+</div>
