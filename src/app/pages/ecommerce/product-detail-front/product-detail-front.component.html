@@ -1,0 +1,87 @@
+<div class="product-detail-page">
+  <div *ngIf="loading()" class="state-message">Loading product details...</div>
+  <div *ngIf="error()" class="state-message error">{{ error() }}</div>
+
+  <ng-container *ngIf="product() as product">
+    <div class="product-detail-card">
+      <img
+        [src]="getImageUrl(product.imageUrl)"
+        [alt]="product.name"
+        (error)="onImageError($event)"
+      />
+
+      <div class="info">
+        <h2>{{ product.name }}</h2>
+        <p class="description">{{ product.description }}</p>
+
+        <div class="info-grid">
+          <p>
+            <strong>Price:</strong>
+            {{ (product.currentPrice ?? product.basePrice) | currency:'TND':'symbol':'1.2-2' }}
+          </p>
+
+          <p>
+            <strong>Sale mode:</strong>
+            {{ product.saleType || 'STANDARD' }}
+          </p>
+
+          <p>
+            <strong>Seller:</strong>
+            {{ product.sellerName || 'Unknown' }}
+          </p>
+        </div>
+
+        <div class="cart-section">
+          <label for="quantity"><strong>Quantity:</strong></label>
+
+          <input
+            id="quantity"
+            type="number"
+            min="1"
+            [(ngModel)]="quantity"
+          />
+
+          <button
+            type="button"
+            (click)="addToCart(product.id)"
+            [disabled]="addingToCart"
+          >
+            {{ addingToCart ? 'Adding...' : 'Add to cart' }}
+          </button>
+
+          <div *ngIf="addToCartMessage" class="cart-feedback">
+            <p class="cart-message">{{ addToCartMessage }}</p>
+
+            <a
+              *ngIf="addToCartMessage === 'Product added to cart successfully.'"
+              routerLink="/front/cart"
+              class="go-cart-link"
+            >
+              Go to cart
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="seller-products" *ngIf="sellerProducts().length">
+      <h3>Other products from this seller</h3>
+
+      <div class="products-grid">
+        <div class="product-card" *ngFor="let item of sellerProducts()">
+          <img
+            [src]="getImageUrl(item.imageUrl)"
+            [alt]="item.name"
+            (error)="onImageError($event)"
+          />
+
+          <div class="product-content">
+            <h4>{{ item.name }}</h4>
+            <p>{{ (item.currentPrice ?? item.basePrice) | currency:'TND':'symbol':'1.2-2' }}</p>
+            <a [routerLink]="['/front/products', item.id]">View details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

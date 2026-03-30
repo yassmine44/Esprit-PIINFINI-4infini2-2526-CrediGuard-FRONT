@@ -28,8 +28,7 @@ export const routes: Routes = [
         path: 'contact',
         loadComponent: () =>
           import('./pages/contact/contact.component').then(m => m.ContactComponent)
-      }
-      ,
+      }, 
       {
   path: 'credit',
   loadComponent: () =>
@@ -58,8 +57,31 @@ export const routes: Routes = [
 {
   path: 'ecommerce',
   loadComponent: () =>
-    import('./pages/ecommerce-front/ecommerce-front.component').then(m => m.EcommerceFrontComponent)
+    import('./pages/ecommerce/ecommerce-front/ecommerce-front.component')
+      .then(m => m.EcommerceFrontComponent)
 },
+{
+  path: 'products/:id',
+  loadComponent: () =>
+    import('./pages/ecommerce/product-detail-front/product-detail-front.component')
+      .then(m => m.ProductDetailFrontComponent)
+},
+{
+  path: 'cart',
+  loadComponent: () =>
+    import('./pages/ecommerce/cart/cart.component').then(m => m.CartComponent)
+},
+{
+  path: 'orders',
+  loadComponent: () =>
+    import('./pages/ecommerce/orders-front/orders-front.component').then(m => m.OrdersFrontComponent)
+},
+{
+  path: 'checkout',
+  loadComponent: () =>
+    import('./pages/ecommerce/checkout/checkout.component').then(m => m.CheckoutComponent)
+},
+
 {
   path: 'profile',
   loadComponent: () =>
@@ -149,6 +171,55 @@ export const routes: Routes = [
           import('./features/ecommerce/ecommerce.component')
             .then(m => m.EcommerceComponent)
       },
+      {
+  path: 'ecommerce/categories',
+  loadComponent: () =>
+    import('./features/ecommerce/categories-admin/categories-admin.component')
+      .then(m => m.CategoriesAdminComponent)
+},
+{
+  path: 'ecommerce/products',
+  loadComponent: () =>
+    import('./features/ecommerce/products-admin/products-admin.component')
+      .then(m => m.ProductsAdminComponent)
+},
+{
+  path: 'ecommerce/products/new',
+  loadComponent: () =>
+    import('./features/ecommerce/product-form-admin/product-form-admin.component')
+      .then(m => m.ProductFormAdminComponent)
+},
+{
+  path: 'ecommerce/products/edit/:id',
+  loadComponent: () =>
+    import('./features/ecommerce/product-form-admin/product-form-admin.component')
+      .then(m => m.ProductFormAdminComponent)
+},
+{
+  path: 'ecommerce/orders',
+  loadComponent: () =>
+    import('./features/ecommerce/orders-admin/orders-admin.component')
+      .then(m => m.OrdersAdminComponent)
+},
+{
+  path: 'ecommerce/promo-codes',
+  loadComponent: () =>
+    import('./features/ecommerce/promo-codes-admin/promo-codes-admin.component')
+      .then(m => m.PromoCodesAdminComponent)
+},
+{
+  path: 'ecommerce/payments',
+  loadComponent: () =>
+    import('./features/ecommerce/payments-admin/payments-admin.component')
+      .then(m => m.PaymentsAdminComponent)
+},
+{
+  path: 'ecommerce/deliveries',
+  loadComponent: () =>
+    import('./features/ecommerce/deliveries-admin/deliveries-admin.component')
+      .then(m => m.DeliveriesAdminComponent)
+},
+
       {
         path: 'finance',
         loadComponent: () =>

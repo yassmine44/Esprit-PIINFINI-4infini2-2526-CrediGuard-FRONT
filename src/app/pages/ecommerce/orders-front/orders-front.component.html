@@ -1,0 +1,136 @@
+<div class="orders-page">
+  <div class="orders-header">
+    <div>
+      <h2>My Orders</h2>
+      <p class="subtitle">Track your purchases, delivery and payment details.</p>
+    </div>
+
+    <a routerLink="/front/ecommerce" class="shop-btn">
+      Continue Shopping
+    </a>
+  </div>
+
+  <div *ngIf="loading()" class="state-message">
+    Loading orders...
+  </div>
+
+  <div *ngIf="error()" class="state-message error">
+    {{ error() }}
+  </div>
+
+  <div *ngIf="!loading() && !hasOrders()" class="empty-orders">
+    <h3>No orders yet</h3>
+    <p>You have not placed any orders yet.</p>
+    <a routerLink="/front/ecommerce" class="shop-btn">Start shopping</a>
+  </div>
+
+  <div *ngIf="hasOrders()" class="orders-list">
+    <div class="order-card" *ngFor="let order of orders()">
+      <div class="order-top">
+        <div>
+          <h3>Order #{{ order.id }}</h3>
+          <p class="order-date">
+            {{ order.createdAt | date:'medium' }}
+          </p>
+        </div>
+
+        <div [class]="orderStatusClass(order.status)">
+          {{ order.status }}
+        </div>
+      </div>
+
+      <div class="order-body">
+        <div class="order-items">
+          <h4>Items</h4>
+
+          <div class="order-item" *ngFor="let item of order.items">
+            <div>
+              <strong>{{ item.productName }}</strong>
+              <p>Quantity: {{ item.quantity }}</p>
+              <p>Unit price: {{ item.unitPrice | currency:'TND':'symbol':'1.2-2' }}</p>
+            </div>
+
+            <div class="line-total">
+              {{ item.lineTotal | currency:'TND':'symbol':'1.2-2' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="order-side">
+          <div class="info-card">
+            <h4>Delivery</h4>
+
+            <ng-container *ngIf="getDelivery(order.id) as delivery; else noDelivery">
+              <p>
+                <span class="label">Type:</span>
+                {{ delivery.deliveryType }}
+              </p>
+              <p>
+                <span class="label">Slot:</span>
+                {{ delivery.deliverySlot }}
+              </p>
+              <p>
+                <span class="label">Fee:</span>
+                {{ delivery.deliveryFee | currency:'TND':'symbol':'1.2-2' }}
+              </p>
+              <p>
+                <span class="label">Status:</span>
+                <span [class]="deliveryStatusClass(delivery.deliveryStatus)">
+                  {{ delivery.deliveryStatus }}
+                </span>
+              </p>
+
+              <div *ngIf="delivery.address" class="address-box">
+                <p><strong>{{ delivery.address.fullName }}</strong></p>
+                <p>{{ delivery.address.phone }}</p>
+                <p>{{ delivery.address.city }}</p>
+                <p>{{ delivery.address.addressLine }}</p>
+                <p *ngIf="delivery.address.additionalInfo">{{ delivery.address.additionalInfo }}</p>
+              </div>
+            </ng-container>
+
+            <ng-template #noDelivery>
+              <p class="muted">No delivery information.</p>
+            </ng-template>
+          </div>
+
+          <div class="info-card">
+            <h4>Payment</h4>
+
+            <ng-container *ngIf="getPayment(order.id) as payment; else noPayment">
+              <p>
+                <span class="label">Method:</span>
+                {{ payment.paymentType }}
+              </p>
+              <p>
+                <span class="label">Status:</span>
+                <span [class]="paymentStatusClass(payment.paymentStatus)">
+                  {{ payment.paymentStatus }}
+                </span>
+              </p>
+              <p>
+                <span class="label">Amount:</span>
+                {{ payment.amount | currency:'TND':'symbol':'1.2-2' }}
+              </p>
+              <p *ngIf="payment.transactionRef">
+                <span class="label">Ref:</span>
+                {{ payment.transactionRef }}
+              </p>
+            </ng-container>
+
+            <ng-template #noPayment>
+              <p class="muted">No payment information.</p>
+            </ng-template>
+          </div>
+
+          <div class="info-card total-card">
+            <h4>Total</h4>
+            <div class="grand-total">
+              {{ order.totalAmount | currency:'TND':'symbol':'1.2-2' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

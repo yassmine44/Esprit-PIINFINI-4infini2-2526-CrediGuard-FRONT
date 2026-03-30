@@ -1,43 +1,109 @@
-<div class="module-page">
-  <div class="module-header">
-    <div>
+<div class="ecommerce-dashboard">
+  <div class="dashboard-header">
+    <div class="header-content">
+      <span class="section-label">Administration / E-Commerce</span>
       <h1>E-Commerce Management</h1>
-      <p>Manage products, categories, orders, payments, deliveries, and promotions.</p>
+      <p>
+        Centralize catalog, categories, orders, payments, deliveries, and promotions
+        from one professional dashboard.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <a routerLink="/admin/ecommerce/products/new" class="primary-btn">
+        + Add Product
+      </a>
     </div>
   </div>
 
-  <div class="summary-grid">
-    <div class="summary-card">
-      <span>Total Products</span>
-      <h2>0</h2>
-    </div>
-
-    <div class="summary-card">
-      <span>Total Orders</span>
-      <h2>0</h2>
-    </div>
-
-    <div class="summary-card">
-      <span>Pending Deliveries</span>
-      <h2>0</h2>
-    </div>
-
-    <div class="summary-card">
-      <span>Active Promotions</span>
-      <h2>0</h2>
-    </div>
+  <div *ngIf="loading()" class="info-message">
+    Loading dashboard data...
   </div>
 
-  <div class="module-grid">
-    <div class="module-card" *ngFor="let card of cards">
-      <div class="card-top">
-        <h3>{{ card.title }}</h3>
-        <span class="card-badge">{{ card.value }}</span>
+  <div *ngIf="error()" class="message error">
+    {{ error() }}
+  </div>
+
+  <div class="kpi-grid" *ngIf="!loading() && !error()">
+    <div class="kpi-card" *ngFor="let kpi of kpis()">
+      <div class="kpi-top">
+        <div class="kpi-icon">
+          <mat-icon>{{ kpi.icon }}</mat-icon>
+        </div>
       </div>
 
-      <p>{{ card.description }}</p>
+      <div class="kpi-body">
+        <span class="kpi-title">{{ kpi.title }}</span>
+        <h2>{{ kpi.value }}</h2>
+        <p>{{ kpi.subtitle }}</p>
+        <span class="kpi-trend" [ngClass]="kpi.trendType">
+          {{ kpi.trend }}
+        </span>
+      </div>
+    </div>
+  </div>
 
-      <button type="button">{{ card.action }}</button>
+  <div class="dashboard-section">
+    <div class="section-header">
+      <div>
+        <h2>Management Modules</h2>
+        <p>Access each e-commerce domain from a dedicated workspace.</p>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="module-card" *ngFor="let module of modules" [routerLink]="module.route">
+        <div class="module-icon">
+          <mat-icon>{{ module.icon }}</mat-icon>
+        </div>
+
+        <div class="module-content">
+          <h3>{{ module.title }}</h3>
+          <p>{{ module.description }}</p>
+        </div>
+
+        <span class="module-link">
+          {{ module.action }} →
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="quick-actions-card">
+      <div class="section-header">
+        <div>
+          <h2>Quick Actions</h2>
+          <p>Shortcuts for the most frequent tasks.</p>
+        </div>
+      </div>
+
+      <div class="quick-actions-list">
+        <a
+          *ngFor="let action of quickActions"
+          [routerLink]="action.route"
+          class="quick-action-btn"
+        >
+          {{ action.label }}
+        </a>
+      </div>
+    </div>
+
+    <div class="overview-card">
+      <div class="section-header">
+        <div>
+          <h2>Overview</h2>
+          <p>Recommended structure for daily administration.</p>
+        </div>
+      </div>
+
+      <ul class="overview-list">
+        <li>Maintain a clean category hierarchy before creating products.</li>
+        <li>Keep product stock, images, and pricing updated regularly.</li>
+        <li>Review preorder items and release dates frequently.</li>
+        <li>Track out-of-stock products to avoid dead catalog entries.</li>
+        <li>Use seller information to build a more realistic marketplace view.</li>
+      </ul>
     </div>
   </div>
 </div>

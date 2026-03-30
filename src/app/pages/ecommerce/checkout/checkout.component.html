@@ -1,0 +1,161 @@
+<div class="checkout-page">
+  <h2>Checkout</h2>
+
+  <div *ngIf="loading()" class="state-message">
+    Loading checkout...
+  </div>
+
+  <div *ngIf="error()" class="state-message error">
+    {{ error() }}
+  </div>
+
+  <div *ngIf="successMessage()" class="state-message success">
+    {{ successMessage() }}
+  </div>
+
+  <ng-container *ngIf="cart() as cartData">
+    <div *ngIf="!cartData.items.length && !successMessage()" class="empty-checkout">
+      <p>Your cart is empty.</p>
+      <a routerLink="/front/ecommerce" class="back-btn">Back to shopping</a>
+    </div>
+
+    <div *ngIf="cartData.items.length" class="checkout-content">
+      <div class="checkout-items">
+        <div class="checkout-item" *ngFor="let item of cartData.items">
+          <div class="checkout-item-left">
+            <img
+              [src]="getImageUrl(item.imageUrl)"
+              [alt]="item.productName"
+              (error)="onImageError($event)"
+              class="checkout-item-image"
+            />
+
+            <div>
+              <h4>{{ item.productName }}</h4>
+              <p>Quantity: {{ item.quantity }}</p>
+              <p>
+                Unit price:
+                {{ item.unitPrice | currency:'TND':'symbol':'1.2-2' }}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <strong>{{ item.lineTotal | currency:'TND':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="delivery-address-box">
+        <h3>Delivery Address</h3>
+
+        <div *ngIf="savedAddress()" class="saved-address-success">
+          Address saved successfully.
+        </div>
+
+        <div class="address-form">
+          <input
+            type="text"
+            [(ngModel)]="fullName"
+            placeholder="Full name"
+          />
+
+          <input
+            type="text"
+            [(ngModel)]="phone"
+            placeholder="Phone (8 digits)"
+          />
+
+          <input
+            type="text"
+            [(ngModel)]="city"
+            placeholder="City"
+          />
+
+          <input
+            type="text"
+            [(ngModel)]="addressLine"
+            placeholder="Address line"
+          />
+
+          <textarea
+            [(ngModel)]="additionalInfo"
+            placeholder="Additional info (optional)"
+          ></textarea>
+
+          <button
+            type="button"
+            class="save-address-btn"
+            (click)="saveDeliveryAddress()"
+            [disabled]="savingAddress()"
+          >
+            {{ savingAddress() ? 'Saving address...' : 'Save address' }}
+          </button>
+        </div>
+      </div>
+<label for="paymentType">Payment method</label>
+
+<select id="paymentType" [(ngModel)]="paymentType">
+  <option value="CASH_ON_DELIVERY">Cash on delivery</option>
+  <option value="CARD">Card</option>
+  <option value="BANK_TRANSFER">Bank transfer</option>
+  <option value="WALLET">Wallet</option>
+</select>
+      <div class="checkout-summary">
+        <h3>Order Summary</h3>
+
+        <label for="deliveryType">Delivery type</label>
+        <select id="deliveryType" [(ngModel)]="deliveryType">
+          <option value="STANDARD">Standard</option>
+          <option value="EXPRESS">Express</option>
+        </select>
+
+        <label for="deliverySlot">Delivery slot</label>
+        <select id="deliverySlot" [(ngModel)]="deliverySlot">
+          <option value="MORNING">Morning</option>
+          <option value="AFTERNOON">Afternoon</option>
+          <option value="EVENING">Evening</option>
+        </select>
+
+        <label for="deliveryFee">Delivery fee</label>
+        <input
+          id="deliveryFee"
+          type="number"
+          min="0"
+          [(ngModel)]="deliveryFee"
+        />
+
+      <label for="promoCode">Promo code (optional)</label>
+<input
+  id="promoCode"
+  type="text"
+  [(ngModel)]="promoCode"
+  placeholder="Enter promo code"
+/>
+
+        <p>
+          <strong>Total products:</strong>
+          {{ cartData.total | currency:'TND':'symbol':'1.2-2' }}
+        </p>
+
+        <p>
+          <strong>Total with delivery:</strong>
+          {{ (cartData.total + deliveryFee) | currency:'TND':'symbol':'1.2-2' }}
+        </p>
+
+        <button
+          type="button"
+          class="place-order-btn"
+          (click)="placeOrder()"
+          [disabled]="placingOrder()"
+        >
+          {{ placingOrder() ? 'Placing order...' : 'Place order' }}
+        </button>
+
+        <a routerLink="/front/cart" class="back-cart-link">
+          Back to cart
+        </a>
+      </div>
+    </div>
+  </ng-container>
+</div>

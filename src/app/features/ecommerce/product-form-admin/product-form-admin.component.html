@@ -1,0 +1,213 @@
+<div class="product-form-page">
+  <div class="page-header">
+    <div>
+      <h2>{{ isEditMode() ? 'Edit Product' : 'Add Product' }}</h2>
+      <p>
+        {{ isEditMode()
+          ? 'Update product information, pricing, and availability.'
+          : 'Create a new product and assign it to a category.' }}
+      </p>
+    </div>
+
+    <button type="button" class="secondary-btn" (click)="cancel()">
+      Back to Products
+    </button>
+  </div>
+
+  <div *ngIf="loading()" class="info-message">
+    Loading product...
+  </div>
+
+  <div *ngIf="error()" class="message error">
+    {{ error() }}
+  </div>
+
+  <div *ngIf="success()" class="message success">
+    {{ success() }}
+  </div>
+
+  <div class="form-card" *ngIf="!loading()">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="categoryId">Category</label>
+        <select id="categoryId" [(ngModel)]="formData.categoryId">
+          <option [ngValue]="null">Select category</option>
+          <option *ngFor="let category of categories()" [ngValue]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="saleType">Sale Type</label>
+        <select id="saleType" [(ngModel)]="formData.saleType" (change)="onSaleTypeChange()">
+          <option *ngFor="let type of saleTypes" [ngValue]="type">
+            {{ type }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="productImage">Product Image</label>
+        <input
+          id="productImage"
+          type="file"
+          accept="image/*"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+
+      <div class="form-group full-width" *ngIf="imagePreview()">
+        <label>Preview</label>
+        <img
+          [src]="imagePreview()"
+          alt="Preview"
+          class="product-image-preview"
+          (error)="onImagePreviewError($event)"
+        />
+      </div>
+
+      <div class="form-group full-width">
+        <label for="name">Product Name</label>
+        <input
+          id="name"
+          type="text"
+          [(ngModel)]="formData.name"
+          placeholder="e.g. iPhone 17"
+        />
+      </div>
+
+      <div class="form-group full-width">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          rows="4"
+          [(ngModel)]="formData.description"
+          placeholder="Write product description"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="basePrice">Base Price</label>
+        <input
+          id="basePrice"
+          type="number"
+          [(ngModel)]="formData.basePrice"
+          min="0"
+          step="0.01"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="stockQuantity">Stock Quantity</label>
+        <input
+          id="stockQuantity"
+          type="number"
+          [(ngModel)]="formData.stockQuantity"
+          min="0"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="paymentMode">Payment Mode</label>
+        <select id="paymentMode" [(ngModel)]="formData.paymentMode">
+          <option [ngValue]="null">Select payment mode</option>
+          <option *ngFor="let mode of paymentTypes" [ngValue]="mode">
+            {{ mode.replace('_', ' ') }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="depositPercentage">Deposit Percentage</label>
+        <input
+          id="depositPercentage"
+          type="number"
+          [(ngModel)]="formData.depositPercentage"
+          min="0"
+          max="1"
+          step="0.01"
+          placeholder="e.g. 0.2"
+        />
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="formData.dynamicPricingEnabled" />
+          Enable Dynamic Pricing
+        </label>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox" [(ngModel)]="formData.expressDeliveryAvailable" />
+          Express Delivery Available
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="expressDeliveryFee">Express Delivery Fee</label>
+        <input
+          id="expressDeliveryFee"
+          type="number"
+          [(ngModel)]="formData.expressDeliveryFee"
+          min="0"
+          step="0.01"
+        />
+      </div>
+    </div>
+
+    <div class="preorder-section" *ngIf="formData.saleType === 'PREORDER'">
+      <h3>Preorder Settings</h3>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="preorderQuota">Preorder Quota</label>
+          <input
+            id="preorderQuota"
+            type="number"
+            [(ngModel)]="formData.preorderQuota"
+            min="1"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="preorderStartDate">Preorder Start Date</label>
+          <input
+            id="preorderStartDate"
+            type="datetime-local"
+            [(ngModel)]="formData.preorderStartDate"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="preorderEndDate">Preorder End Date</label>
+          <input
+            id="preorderEndDate"
+            type="datetime-local"
+            [(ngModel)]="formData.preorderEndDate"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="expectedReleaseDate">Expected Release Date</label>
+          <input
+            id="expectedReleaseDate"
+            type="datetime-local"
+            [(ngModel)]="formData.expectedReleaseDate"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="primary-btn" (click)="saveProduct()" [disabled]="saving()">
+        {{ saving() ? 'Saving...' : (isEditMode() ? 'Update Product' : 'Create Product') }}
+      </button>
+
+      <button type="button" class="secondary-btn" (click)="cancel()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

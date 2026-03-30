@@ -1,0 +1,40 @@
+<div class="ecommerce-front-page">
+  <div class="hero">
+    <h2>Explore Products</h2>
+    <p>Discover available products and view detailed information before ordering.</p>
+  </div>
+
+  <div *ngIf="loading()" class="state-message">Loading products...</div>
+  <div *ngIf="error()" class="state-message error">{{ error() }}</div>
+
+  <div class="products-grid" *ngIf="!loading() && products().length">
+    <div class="product-card" *ngFor="let product of products()">
+      <img
+        [src]="getImageUrl(product.imageUrl)"
+        [alt]="product.name"
+        (error)="onImageError($event)"
+      />
+
+      <div class="product-content">
+        <h3>{{ product.name }}</h3>
+        <p class="description">{{ product.description }}</p>
+
+        <div class="meta">
+          <span class="seller">Seller: {{ product.sellerName || 'Unknown' }}</span>
+          <span class="mode">{{ product.saleType || 'STANDARD' }}</span>
+        </div>
+
+        <div class="footer">
+         <span class="price">
+  {{ (product.currentPrice ?? product.basePrice) | currency:'TND':'symbol':'1.2-2' }}
+</span>
+          <a class="btn-details" [routerLink]="['/front/products', product.id]">View details</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading() && !products().length" class="state-message">
+    No products available.
+  </div>
+</div>
