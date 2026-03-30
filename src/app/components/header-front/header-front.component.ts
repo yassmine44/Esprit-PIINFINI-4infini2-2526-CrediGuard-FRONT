@@ -26,7 +26,7 @@ export class HeaderFrontComponent {
     if (this.authService.isAdmin()) {
       this.router.navigate(['/admin/profile']);
     } else {
-      this.router.navigate(['/Front/profile']);
+      this.router.navigate(['/front/profile']);
     }
   }
 }
