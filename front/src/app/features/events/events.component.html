@@ -1,0 +1,43 @@
+<div class="module-page">
+  <div class="module-header">
+    <div>
+      <h1>Events Management</h1>
+      <p>Manage events, registrations, schedules, guests, and notifications.</p>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Total Events</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Total Registrations</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Upcoming Events</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Pending Notifications</span>
+      <h2>0</h2>
+    </div>
+  </div>
+
+  <div class="module-grid">
+    <div class="module-card" *ngFor="let card of cards">
+      <div class="card-top">
+        <h3>{{ card.title }}</h3>
+        <span class="card-badge">{{ card.value }}</span>
+      </div>
+
+      <p>{{ card.description }}</p>
+
+      <button type="button">{{ card.action }}</button>
+    </div>
+  </div>
+</div>

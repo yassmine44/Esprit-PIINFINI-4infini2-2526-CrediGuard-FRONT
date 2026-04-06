@@ -1,0 +1,42 @@
+<div class="module-page">
+  <div class="module-header">
+    <div>
+      <h1>Crowdfunding Management</h1>
+      <p>Manage campaigns, investors, contributions, milestones, and withdrawals.</p>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Total Campaigns</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Total Investors</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Total Contributions</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Pending Withdrawals</span>
+      <h2>0</h2>
+    </div>
+  </div>
+
+  <div class="module-grid">
+    <div class="module-card" *ngFor="let card of cards">
+      <div class="card-top">
+        <h3>{{ card.title }}</h3>
+        <span class="card-badge">{{ card.value }}</span>
+      </div>
+
+      <p>{{ card.description }}</p>
+      <button type="button">{{ card.action }}</button>
+    </div>
+  </div>
+</div>

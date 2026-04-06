@@ -1,0 +1,169 @@
+<div class="users-page">
+
+  <!-- TOP SECTION -->
+  <div class="page-top">
+    <div class="page-title-block">
+      <h1>Users Management</h1>
+      <p>Manage all platform users, roles, and account status.</p>
+    </div>
+
+    <button (click)="openAddUserDialog()" class="btn-add">
+      + Add User
+    </button>
+  </div>
+
+  <!-- STATS CARDS -->
+  <div class="stats-grid" *ngIf="!loading">
+  <div class="stat-card">
+    <span class="stat-label">Total Users</span>
+    <h2>{{ totalUsersCount }}</h2>
+  </div>
+
+  <div class="stat-card active-card">
+    <span class="stat-label">Active Users</span>
+    <h2>{{ activeUsersCount }}</h2>
+  </div>
+
+  <div class="stat-card disabled-card">
+    <span class="stat-label">Disabled Users</span>
+    <h2>{{ disabledUsersCount }}</h2>
+  </div>
+
+  <div class="stat-card admin-card">
+    <span class="stat-label">Admins</span>
+    <h2>{{ adminUsersCount }}</h2>
+  </div>
+</div>
+
+  <!-- FILTER BAR -->
+  <div class="toolbar">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Search by name or email..."
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+        class="search-input"
+      />
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="loading-card">
+    <div class="spinner"></div>
+    <p>Loading users...</p>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="table-card" *ngIf="!loading">
+    <div class="table-header">
+      <h3>Users List</h3>
+      <span>{{ filteredUsers.length }} result(s)</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Phone</th>
+            <th>Account Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let user of paginatedUsers">
+            <td>
+              <div class="user-cell">
+                <div class="avatar">
+                 {{ user.fullName.charAt(0) || 'U' }}
+                </div>
+                <div class="user-meta">
+                  <strong>{{ user.fullName }}</strong>
+                  <span>ID: {{ user.id }}</span>
+                </div>
+              </div>
+            </td>
+
+            <td>{{ user.email }}</td>
+
+            <td>
+              <span
+                class="badge role-badge"
+                [ngClass]="{
+                  'role-admin': user.userType === 'ADMIN',
+                  'role-client': user.userType === 'CLIENT'
+              
+                }"
+              >
+                {{ user.userType }}
+              </span>
+            </td>
+
+            <td>{{ user.phone || '-' }}</td>
+
+            <td>
+              <span
+                class="badge status-badge"
+                [ngClass]="user.enabled ? 'status-active' : 'status-disabled'"
+              >
+                {{ user.enabled ? 'Active' : 'Disabled' }}
+              </span>
+            </td>
+
+            <td class="actions text-center">
+              <button
+                (click)="openEditUserDialog(user)"
+                class="btn-action btn-edit"
+              >
+                Edit
+              </button>
+
+              <button
+                (click)="deleteUser(user.id!)"
+                class="btn-action btn-delete"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="paginatedUsers.length === 0">
+            <td colspan="6" class="empty-state">
+              <div class="empty-box">
+                <h4>No users found</h4>
+                <p>Try another search term or add a new user.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button
+        (click)="prevPage()"
+        [disabled]="currentPage === 1"
+        class="page-btn"
+      >
+        Prev
+      </button>
+
+      <span class="page-indicator">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+        class="page-btn"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>
