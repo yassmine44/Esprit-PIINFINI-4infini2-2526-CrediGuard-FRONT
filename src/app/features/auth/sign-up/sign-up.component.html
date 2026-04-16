@@ -1,0 +1,91 @@
+<div class="auth-page">
+  <!-- HERO (image + overlay) -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+
+    <header class="brand">
+      <span class="dot"></span>
+      <div class="brand-text">
+        <div class="brand-name">CrediGuard</div>
+        <div class="brand-sub">Micro-finance intelligente</div>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="card-head">
+        <h1>Register</h1>
+        <p>Crée ton compte et rejoins la plateforme</p>
+      </div>
+
+      <form class="card-body" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label>Full name</label>
+          <input type="text" formControlName="fullName" placeholder="Votre nom complet" />
+          <small class="err" *ngIf="fullName?.touched && fullName?.invalid">
+            Nom obligatoire (min 3 caractères)
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input type="email" formControlName="email" placeholder="ex: name@email.com" />
+          <small class="err" *ngIf="email?.touched && email?.invalid">
+            Email obligatoire et valide
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <div class="password">
+            <input
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="••••••••"
+            />
+            <button type="button" class="eye" (click)="hidePassword = !hidePassword" aria-label="toggle">
+              <!-- icon simple -->
+              <span *ngIf="hidePassword">👁️</span>
+              <span *ngIf="!hidePassword">🙈</span>
+            </button>
+          </div>
+          <small class="err" *ngIf="password?.touched && password?.invalid">
+            Mot de passe min 6 caractères
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Phone</label>
+          <input type="text" formControlName="phone" placeholder="8 chiffres (optionnel)" />
+          <small class="err" *ngIf="phone?.touched && phone?.invalid">
+            Téléphone doit contenir 8 chiffres
+          </small>
+        </div>
+
+        <label class="terms">
+          <input type="checkbox" formControlName="agree" />
+          <span>I agree to the <b>Terms and Conditions</b></span>
+        </label>
+
+        <button class="btn" type="submit" [disabled]="isLoading || form.invalid">
+          {{ isLoading ? 'Creating...' : 'Sign up' }}
+        </button>
+
+        <div class="switch">
+          Already have an account?
+          <a routerLink="/auth/sign-in">Sign in</a>
+        </div>
+
+        <div class="err center" *ngIf="errorMsg">{{ errorMsg }}</div>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>© {{ currentYear }} CrediGuard – Risque anticipé, décision maîtrisée.</div>
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">Support</a>
+      <a href="#">Privacy</a>
+    </div>
+  </footer>
+</div>

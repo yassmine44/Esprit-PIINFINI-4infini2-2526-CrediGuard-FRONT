@@ -1,0 +1,55 @@
+<section class="profile-front-page">
+  <div class="profile-header">
+    <span class="badge">My Account</span>
+    <h1>My Profile</h1>
+    <p>Manage your personal information and keep your account details up to date.</p>
+  </div>
+
+  <div *ngIf="loading" class="state-box">Loading profile...</div>
+  <div *ngIf="errorMessage" class="state-box error">{{ errorMessage }}</div>
+  <div *ngIf="message" class="state-box success">{{ message }}</div>
+
+  <div class="profile-layout" *ngIf="!loading && profile">
+    <!-- LEFT CARD -->
+    <div class="profile-card">
+      <div class="avatar">
+        {{ initials }}
+      </div>
+
+      <h2>{{ profile.fullName }}</h2>
+      <p class="role">{{ profile.userType }}</p>
+
+      <span class="status" [class.active]="profile.enabled">
+        {{ profile.enabled ? 'Active' : 'Disabled' }}
+      </span>
+    </div>
+
+    <!-- RIGHT CARD -->
+    <div class="profile-form-card">
+      <h2>Basic Information</h2>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" formControlName="fullName" />
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" formControlName="phone" />
+        </div>
+
+        <button type="submit" class="save-btn" [disabled]="saving">
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</section>

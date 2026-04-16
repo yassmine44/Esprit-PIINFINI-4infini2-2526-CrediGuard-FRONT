@@ -1,0 +1,100 @@
+<div class="auth-page">
+  <!-- HERO IMAGE -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+
+    <header class="brand">
+      <span class="dot"></span>
+      <div class="brand-text">
+        <div class="brand-title">CrediGuard</div>
+        <div class="brand-subtitle">Micro-finance intelligente</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <mat-card class="auth-card" appearance="outlined">
+        <!-- HEADER -->
+        <div class="card-head">
+          <h2>Sign In</h2>
+          <p>Enter your email and password to Sign In</p>
+        </div>
+
+        <form class="form" [formGroup]="form" (ngSubmit)="login()">
+          <!-- EMAIL -->
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" autocomplete="email" />
+            <mat-icon matSuffix>mail</mat-icon>
+
+            <mat-error *ngIf="emailCtrl.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="emailCtrl.hasError('email')">
+              Invalid email
+            </mat-error>
+          </mat-form-field>
+
+          <!-- PASSWORD -->
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Password</mat-label>
+
+            <input
+              matInput
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hidePassword = !hidePassword"
+              aria-label="toggle password"
+            >
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+
+            <mat-error *ngIf="passwordCtrl.hasError('required')">
+              Password is required
+            </mat-error>
+          </mat-form-field>
+
+          <!-- REMEMBER -->
+          <mat-checkbox formControlName="remember" class="remember">
+            Remember me
+          </mat-checkbox>
+          <a routerLink="/auth/forgot-password">Forgot password?</a>
+
+          <!-- BUTTON (noir) -->
+          <button
+            mat-raised-button
+            class="btn-black"
+            type="submit"
+            [disabled]="form.invalid"
+          >
+            Sign in
+          </button>
+
+          <p class="switch">
+            Don't have an account?
+            <a routerLink="/auth/sign-up"><b>Sign up</b></a>
+          </p>
+
+          <p class="err center" *ngIf="errorMsg">{{ errorMsg }}</p>
+        </form>
+      </mat-card>
+    </main>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>© {{ currentYear }} CrediGuard — Risque anticipé, décision maîtrisée.</div>
+
+    <div class="footer-links">
+      <a href="#">About</a>
+      <a href="#">Support</a>
+      <a href="#">Privacy</a>
+    </div>
+  </footer>
+</div>
