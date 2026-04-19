@@ -173,11 +173,12 @@ export class ProductsAdminComponent implements OnInit {
     });
   }
 
-  getCategoryName(categoryId: number | null): string {
-    if (!categoryId) return '-';
-    const category = this.categories().find(c => c.id === categoryId);
-    return category ? category.name : `#${categoryId}`;
-  }
+ getCategoryName(categoryId: number | null | undefined): string {
+  if (categoryId == null) return '—';
+
+  const category = this.categories().find(c => c.id === categoryId);
+  return category?.name ?? 'Unknown category';
+}
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);

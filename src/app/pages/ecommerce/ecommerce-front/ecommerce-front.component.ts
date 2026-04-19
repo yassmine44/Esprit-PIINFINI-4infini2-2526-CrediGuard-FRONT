@@ -12,6 +12,9 @@ import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Product } from '../../../features/ecommerce/models/product.model';
 import { ProductService } from '../../../features/ecommerce/services/product.service';
+import { CalendarEvent } from '../../../pages/ecommerce/models/calendar-event.model';
+import { CalendarEventService } from '../../../pages/ecommerce/services/calendar-event.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-ecommerce-front',
@@ -24,13 +27,15 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
 
   private productService = inject(ProductService);
   private platformId = inject(PLATFORM_ID);
+  private calendarEventService = inject(CalendarEventService);
+  private authService = inject(AuthService);
 
-  // Signals
   products = signal<Product[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
   selectedCategory = signal<string>('All');
   carouselOffset = signal(0);
+  activeEvent = signal<CalendarEvent | null>(null);
 
   private observer?: IntersectionObserver;
   private carouselInterval: any;
@@ -41,7 +46,6 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  // Computed values
   categories = computed<string[]>(() => {
     const cats = new Set<string>();
     this.products().forEach(product => {
@@ -56,7 +60,14 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
     const allProducts = this.products();
     const category = this.selectedCategory();
 
-    if (category === 'All') return allProducts;
+    if (category === 'All') {
+      return allProducts;
+    }
+
+    if (category === 'PROMO') {
+      return allProducts.filter(product => this.hasPromotion(product));
+    }
+
     return allProducts.filter(p => p.categoryName?.trim() === category);
   });
 
@@ -70,8 +81,25 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
       .slice(0, 8);
   });
 
+  promotedProducts = computed<Product[]>(() => {
+    return this.products().filter(product => this.hasPromotion(product));
+  });
+
   ngOnInit(): void {
     this.loadProducts();
+    this.loadActiveEvent();
+  }
+
+  loadActiveEvent(): void {
+    this.calendarEventService.getActive().subscribe({
+      next: (events) => {
+        this.activeEvent.set(events && events.length > 0 ? events[0] : null);
+      },
+      error: (err) => {
+        console.error('Failed to load active calendar events:', err);
+        this.activeEvent.set(null);
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -113,17 +141,16 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
       this.startAutoCarousel();
     } else if (this.carouselInterval) {
       clearInterval(this.carouselInterval);
+      this.carouselInterval = null;
     }
 
     setTimeout(() => this.observeCards(), 100);
   }
 
-  // ==================== CAROUSEL METHODS (Options 1, 2 & 3) ====================
-
   private startAutoCarousel(): void {
     if (!this.isBrowser || this.carouselInterval) return;
 
-    const cardWidth = 368; // 340px + 28px gap
+    const cardWidth = 368;
 
     this.carouselInterval = setInterval(() => {
       if (this.isPaused) return;
@@ -139,10 +166,9 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
       }
 
       this.carouselOffset.set(current);
-    }, 3200); // Défile toutes les 3.2 secondes
+    }, 3200);
   }
 
-  // Option 3 : Pause au survol
   pauseCarousel(): void {
     this.isPaused = true;
   }
@@ -151,7 +177,6 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
     this.isPaused = false;
   }
 
-  // Option 2 : Flèches de navigation
   prevSlide(): void {
     if (!this.isBrowser) return;
     const cardWidth = 368;
@@ -172,7 +197,6 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
     this.carouselOffset.set(current);
   }
 
-  // Scroll Animation
   private initScrollAnimation(): void {
     if (!this.isBrowser || typeof IntersectionObserver === 'undefined') return;
 
@@ -194,7 +218,6 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
     cards.forEach(card => this.observer!.observe(card));
   }
 
-  // Utilitaires
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = 'assets/default-product.png';
@@ -204,8 +227,34 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
     return this.productService.getImageUrl(imageUrl);
   }
 
+  hasPromotion(product: Product): boolean {
+    return !!product.promotionApplied
+      && product.originalPrice != null
+      && product.finalPrice != null
+      && product.finalPrice < product.originalPrice;
+  }
+
   getDisplayPrice(product: Product): number {
-    return product.currentPrice ?? product.basePrice;
+    return product.finalPrice ?? product.currentPrice ?? product.basePrice;
+  }
+
+  getOriginalPrice(product: Product): number {
+    return product.originalPrice ?? product.currentPrice ?? product.basePrice;
+  }
+
+  getPromotionBadge(product: Product): string {
+    if (!this.hasPromotion(product)) return '';
+    return product.promotionName?.trim() || 'Seasonal Offer';
+  }
+
+  getDiscountPercent(product: Product): number {
+    if (!this.hasPromotion(product) || !product.originalPrice || !product.finalPrice) {
+      return 0;
+    }
+
+    return Math.round(
+      ((product.originalPrice - product.finalPrice) / product.originalPrice) * 100
+    );
   }
 
   trackByProduct(index: number, product: Product): number {
@@ -220,6 +269,37 @@ export class EcommerceFrontComponent implements OnInit, AfterViewInit, OnDestroy
 
   isPreorderProduct(product: Product): boolean {
     return product.saleType === 'PREORDER';
+  }
+
+  getActiveEventLabel(): string {
+    return this.activeEvent()?.name?.trim() || 'Seasonal Offers';
+  }
+
+  getActiveEventDescription(): string {
+    return this.activeEvent()?.description?.trim()
+      || 'Discover our products currently on promotion and enjoy limited-time seasonal deals.';
+  }
+
+  getCurrentUser(): any | null {
+    return this.authService.getUser();
+  }
+
+  getCurrentRole(): string | null {
+    const user = this.getCurrentUser();
+    if (!user) return null;
+
+    const role = user['role'] ?? user['userRole'] ?? user['authorities']?.[0];
+    return typeof role === 'string' ? role.toUpperCase() : null;
+  }
+
+  isSeller(): boolean {
+    const role = this.getCurrentRole();
+    return role === 'BENEFICIARY';
+  }
+
+  isClient(): boolean {
+    const role = this.getCurrentRole();
+    return role === 'CLIENT';
   }
 
   ngOnDestroy(): void {

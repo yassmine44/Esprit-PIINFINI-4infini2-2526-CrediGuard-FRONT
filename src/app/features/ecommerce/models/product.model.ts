@@ -2,31 +2,46 @@ export type SaleMode = 'STANDARD' | 'PREORDER';
 
 export interface Product {
   id: number;
+  sellerId?: number | null;
   sellerName?: string | null;
-  sellerId: number | null;
-  categoryId: number | null;
+  categoryId?: number | null;
   categoryName?: string | null;
+
   name: string;
-  description: string | null;
+  description?: string | null;
+
   basePrice: number;
+  currentPrice?: number | null;
+
+  dynamicPricingEnabled?: boolean | null;
+  pricingStrategy?: string | null;
+
+  saleType?: SaleMode | null;
+  stockQuantity?: number | null;
+  preorderQuota?: number | null;
+  preorderCount?: number | null;
+
+  paymentMode?: string | null;
+  depositPercentage?: number | null;
+
+  expressDeliveryAvailable?: boolean | null;
+  expressDeliveryFee?: number | null;
+
+  preorderStartDate?: string | null;
+  preorderEndDate?: string | null;
+  expectedReleaseDate?: string | null;
+
+  active?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+
   imageUrl?: string | null;
-  currentPrice: number | null;
-  dynamicPricingEnabled: boolean;
-  pricingStrategy: string | null;
-  saleType: SaleMode;
-  stockQuantity: number | null;
-  preorderQuota: number | null;
-  preorderCount: number | null;
-  paymentMode: string | null;
-  depositPercentage: number | null;
-  expressDeliveryAvailable: boolean;
-  expressDeliveryFee: number | null;
-  preorderStartDate: string | null;
-  preorderEndDate: string | null;
-  expectedReleaseDate: string | null;
-  active: boolean;
-  createdAt: string | null;
-  updatedAt: string | null;
+
+  originalPrice?: number | null;
+  finalPrice?: number | null;
+  discountAmount?: number | null;
+  promotionApplied?: boolean;
+  promotionName?: string | null;
 }
 
 export interface ProductCreateRequest {

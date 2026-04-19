@@ -78,16 +78,31 @@ export class OrderDetailFrontComponent implements OnInit {
   }
 
   // Helper pour récupérer l'image depuis OrderItemResponse
-  getImageUrl(item: OrderItemResponse): string {
-    // Si ton modèle OrderItemResponse n'a pas imageUrl, on retourne l'image par défaut
-    // Tu peux modifier cette logique plus tard si tu ajoutes imageUrl dans le backend
+getImageUrl(item: any): string {
+  const imageUrl = item?.productImageUrl;
+
+  if (!imageUrl || String(imageUrl).trim() === '') {
     return 'assets/default-product.png';
   }
 
-  onImageError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-    img.src = 'assets/default-product.png';
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
   }
+
+  if (imageUrl.startsWith('/uploads/')) {
+    return `http://localhost:8089/api${imageUrl}`;
+  }
+
+  if (imageUrl.startsWith('uploads/')) {
+    return `http://localhost:8089/api/${imageUrl}`;
+  }
+
+  return `http://localhost:8089/api/uploads/${imageUrl}`;
+}
+  onImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  img.src = 'assets/default-product.png';
+}
 
   getOrderStatusClass(status: string): string {
     switch (status?.toUpperCase()) {

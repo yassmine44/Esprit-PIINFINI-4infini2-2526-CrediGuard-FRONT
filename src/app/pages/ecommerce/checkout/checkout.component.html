@@ -1,171 +1,138 @@
 <div class="checkout-page">
+  <h2>Checkout</h2>
 
-  <!-- Back Button -->
-  <div class="back-button-container">
-    <a routerLink="/front/cart" class="back-button">
-      ← Back to Cart
-    </a>
+  <div *ngIf="loading()" class="state-message">
+    Loading checkout...
   </div>
 
-  <div class="checkout-header">
-    <h1>Checkout</h1>
-  </div>
-
-  <!-- Loading -->
-  <div *ngIf="loading()" class="state-message loading">
-    <div class="spinner"></div>
-    <p>Preparing checkout...</p>
-  </div>
-
-  <!-- Error -->
   <div *ngIf="error()" class="state-message error">
     {{ error() }}
   </div>
 
-  <!-- Success -->
   <div *ngIf="successMessage()" class="state-message success">
     {{ successMessage() }}
   </div>
 
   <ng-container *ngIf="cart() as cartData">
-
-    <!-- Empty Cart -->
-    <div *ngIf="!cartData.items.length && !successMessage()" class="empty-checkout">
-      <div class="empty-icon">🛍️</div>
-      <h2>Your cart is empty</h2>
-      <p>Please add products before proceeding to checkout.</p>
-      <a routerLink="/front/ecommerce" class="continue-btn">Continue Shopping</a>
+    <div *ngIf="!cartData.items.length && !checkoutResult()" class="empty-checkout">
+      <p>Your cart is empty.</p>
+      <a routerLink="/front/ecommerce" class="back-btn">Back to shopping</a>
     </div>
 
-    <!-- Checkout Content -->
     <div *ngIf="cartData.items.length" class="checkout-content">
-
-      <!-- Left Column: Order Items -->
       <div class="checkout-items">
-        <h3>Order Items ({{ cartData.items.length }})</h3>
-        
-        <div class="checkout-item" *ngFor="let item of cartData.items">
-          <div class="checkout-item-left">
-            <div class="item-image-wrapper">
-              <img [src]="getImageUrl(item.imageUrl)"
-                   [alt]="item.productName"
-                   (error)="onImageError($event)"
-                   class="checkout-item-image">
-            </div>
+        <h3>Your items</h3>
 
-            <div class="item-details">
-              <h4>{{ item.productName }}</h4>
-              <p>Qty: {{ item.quantity }}</p>
-              <p class="unit-price">
-                {{ item.unitPrice | currency:'TND':'symbol':'1.2-2' }}
-              </p>
-            </div>
+        <div class="checkout-item" *ngFor="let item of cartData.items">
+          <img
+            [src]="getImageUrl(item.imageUrl)"
+            [alt]="item.productName"
+            (error)="onImageError($event)"
+            class="product-image"
+          />
+
+          <div class="item-info">
+            <h4>{{ item.productName }}</h4>
+            <p>Quantity: {{ item.quantity }}</p>
+
+            <p *ngIf="item.promotionApplied" class="promo-line">
+              Promo applied: {{ item.promotionName }}
+            </p>
+
+            <p *ngIf="item.originalUnitPrice !== item.finalUnitPrice" class="price-old">
+              Old price: {{ item.originalUnitPrice | currency:'TND ' }}
+            </p>
+
+            <p class="price-new">
+              Price: {{ item.finalUnitPrice | currency:'TND ' }}
+            </p>
           </div>
 
           <div class="item-total">
-            <strong>{{ item.lineTotal | currency:'TND':'symbol':'1.2-2' }}</strong>
+            {{ item.lineTotal | currency:'TND ' }}
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Form + Summary -->
-      <div class="checkout-form-and-summary">
+      <div class="checkout-form">
+        <h3>Delivery address</h3>
 
-        <!-- Delivery Address -->
-        <div class="delivery-address-box">
-          <h3>Delivery Address</h3>
+        <input [(ngModel)]="fullName" placeholder="Full name" />
+        <input [(ngModel)]="phone" placeholder="Phone" />
+        <input [(ngModel)]="city" placeholder="City" />
+        <input [(ngModel)]="addressLine" placeholder="Address line" />
+        <textarea [(ngModel)]="additionalInfo" placeholder="Additional info"></textarea>
 
-          <div *ngIf="savedAddress()" class="address-saved">
-            ✓ Address saved successfully
-          </div>
+        <button type="button" (click)="saveDeliveryAddress()" [disabled]="savingAddress()">
+          {{ savingAddress() ? 'Saving...' : 'Save address' }}
+        </button>
 
-          <div class="address-form">
-            <input type="text" [(ngModel)]="fullName" placeholder="Full Name *" />
-            <input type="text" [(ngModel)]="phone" placeholder="Phone Number *" />
-            <input type="text" [(ngModel)]="city" placeholder="City *" />
-            <input type="text" [(ngModel)]="addressLine" placeholder="Address Line *" />
-            <textarea [(ngModel)]="additionalInfo" placeholder="Additional information (optional)"></textarea>
-
-            <button type="button"
-                    class="save-address-btn"
-                    (click)="saveDeliveryAddress()"
-                    [disabled]="savingAddress()">
-              {{ savingAddress() ? 'Saving...' : 'Save Delivery Address' }}
-            </button>
-          </div>
+        <div *ngIf="savedAddress()" class="saved-box">
+          Address saved: {{ savedAddress()?.fullName }} - {{ savedAddress()?.city }}
         </div>
 
-        <!-- Delivery & Payment -->
-        <div class="delivery-payment-box">
-          <h3>Delivery & Payment</h3>
+        <h3>Delivery options</h3>
 
-          <div class="form-group">
-            <label>Delivery Type</label>
-            <select [(ngModel)]="deliveryType">
-              <option value="STANDARD">Standard Delivery</option>
-              <option value="EXPRESS">Express Delivery</option>
-            </select>
-          </div>
+        <select [(ngModel)]="deliveryType">
+          <option value="STANDARD">STANDARD</option>
+          <option value="EXPRESS">EXPRESS</option>
+        </select>
 
-          <div class="form-group">
-            <label>Delivery Slot</label>
-            <select [(ngModel)]="deliverySlot">
-              <option value="MORNING">Morning (8AM - 12PM)</option>
-              <option value="AFTERNOON">Afternoon (12PM - 5PM)</option>
-              <option value="EVENING">Evening (5PM - 9PM)</option>
-            </select>
-          </div>
+        <select [(ngModel)]="deliverySlot">
+          <option value="MORNING">MORNING</option>
+          <option value="AFTERNOON">AFTERNOON</option>
+          <option value="EVENING">EVENING</option>
+        </select>
 
-          <div class="form-group">
-            <label>Delivery Fee (TND)</label>
-            <input type="number" min="0" [(ngModel)]="deliveryFee" />
-          </div>
+        <input [(ngModel)]="scheduledAt" type="datetime-local" />
 
-          <div class="form-group">
-            <label>Payment Method</label>
-            <select [(ngModel)]="paymentType">
-              <option value="CASH_ON_DELIVERY">Cash on Delivery</option>
-              <option value="CARD">Credit / Debit Card</option>
-              <option value="BANK_TRANSFER">Bank Transfer</option>
-              <option value="WALLET">Wallet</option>
-            </select>
-          </div>
+        <h3>Payment</h3>
 
-          <div class="form-group">
-            <label>Promo Code (optional)</label>
-            <input type="text" [(ngModel)]="promoCode" placeholder="Enter promo code" />
-          </div>
-        </div>
+        <select [(ngModel)]="paymentType">
+          <option value="CARD">CARD</option>
+          <option value="BANK_TRANSFER">BANK_TRANSFER</option>
+          <option value="CASH_ON_DELIVERY">CASH_ON_DELIVERY</option>
+          <option value="WALLET">WALLET</option>
+        </select>
 
-        <!-- Order Summary -->
-        <div class="checkout-summary">
-          <h3>Order Summary</h3>
+        <h3>Promo code</h3>
+        <input [(ngModel)]="promoCode" placeholder="Promo code" />
 
-          <div class="summary-row">
+        <div class="summary-box">
+          <div class="summary-line">
             <span>Subtotal</span>
-            <span>{{ cartData.total | currency:'TND':'symbol':'1.2-2' }}</span>
+            <span>{{ cartData.subtotal | currency:'TND ' }}</span>
           </div>
 
-          <div class="summary-row">
-            <span>Delivery Fee</span>
-            <span>{{ deliveryFee | currency:'TND':'symbol':'1.2-2' }}</span>
+          <div class="summary-line discount" *ngIf="cartData.totalDiscount > 0">
+            <span>Promotion discount</span>
+            <span>- {{ cartData.totalDiscount | currency:'TND ' }}</span>
           </div>
 
-          <div class="summary-row total">
-            <strong>Total to Pay</strong>
-            <strong>{{ (cartData.total + deliveryFee) | currency:'TND':'symbol':'1.2-2' }}</strong>
+          <div class="summary-line">
+            <span>Products total</span>
+            <span>{{ cartData.total | currency:'TND ' }}</span>
           </div>
 
-          <button type="button"
-                  class="place-order-btn"
-                  (click)="placeOrder()"
-                  [disabled]="placingOrder() || !savedAddress()">
-            {{ placingOrder() ? 'Placing Order...' : 'Place Order & Pay' }}
-          </button>
+          <div class="summary-line">
+            <span>Delivery fee</span>
+            <span>{{ deliveryFee() | currency:'TND ' }}</span>
+          </div>
 
-         
+          <div class="summary-line total">
+            <span>Final total</span>
+            <span>{{ finalTotal() | currency:'TND ' }}</span>
+          </div>
         </div>
 
+        <button
+          type="button"
+          class="place-order-btn"
+          (click)="placeOrder()"
+          [disabled]="placingOrder() || !cartData.items.length"
+        >
+          {{ placingOrder() ? 'Processing...' : 'Confirm checkout' }}
+        </button>
       </div>
     </div>
   </ng-container>

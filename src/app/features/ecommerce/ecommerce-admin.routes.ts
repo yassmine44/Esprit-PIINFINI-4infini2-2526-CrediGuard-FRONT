@@ -60,5 +60,30 @@ export const ECOMMERCE_ADMIN_ROUTES: Routes = [
   loadComponent: () =>
     import('./ecommerce-finance-dashboard/ecommerce-finance-dashboard.component')
       .then(m => m.EcommerceFinanceDashboardComponent)
+},
+{
+  path: 'ecommerce/calendar-events',
+  loadComponent: () =>
+    import('./calendar-events-admin/calendar-events-admin.component')
+      .then(m => m.CalendarEventsAdminComponent)
+},
+{
+  path: 'ecommerce/promotions',
+  loadComponent: () =>
+    import('./promotions-admin/promotions-admin.component')
+      .then(m => m.PromotionsAdminComponent)
+}
+,
+{
+  path: 'ecommerce/product-requests',
+  loadComponent: () =>
+    import('./admin/product-requests-admin/admin-product-requests/admin-product-requests.component')
+      .then(m => m.AdminProductRequestsComponent)
+},
+{
+  path: 'ecommerce/product-requests/:id',
+  loadComponent: () =>
+    import('./admin/product-requests-admin/admin-product-request-detail/admin-product-request-detail.component')
+      .then(m => m.AdminProductRequestDetailComponent)
 }
 ];

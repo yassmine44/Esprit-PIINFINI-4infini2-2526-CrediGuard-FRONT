@@ -114,24 +114,24 @@ export class ProductFormAdminComponent implements OnInit, OnDestroy {
     this.selectedFile = null;
 
     this.formData = {
-      categoryId: product.categoryId,
-      name: product.name,
-      description: product.description,
-      basePrice: product.basePrice,
-      imageUrl: this.productService.normalizeImageValue(product.imageUrl) || '',
-      dynamicPricingEnabled: product.dynamicPricingEnabled,
-      pricingStrategy: product.pricingStrategy,
-      saleType: product.saleType,
-      stockQuantity: product.stockQuantity,
-      preorderQuota: product.preorderQuota,
-      paymentMode: product.paymentMode,
-      depositPercentage: product.depositPercentage,
-      expressDeliveryAvailable: product.expressDeliveryAvailable,
-      expressDeliveryFee: product.expressDeliveryFee,
-      preorderStartDate: this.toDatetimeLocal(product.preorderStartDate),
-      preorderEndDate: this.toDatetimeLocal(product.preorderEndDate),
-      expectedReleaseDate: this.toDatetimeLocal(product.expectedReleaseDate)
-    };
+  categoryId: product.categoryId ?? null,
+  name: product.name ?? '',
+  description: product.description ?? '',
+  basePrice: product.basePrice ?? null,
+  imageUrl: this.productService.normalizeImageValue(product.imageUrl) || '',
+  dynamicPricingEnabled: product.dynamicPricingEnabled ?? false,
+  pricingStrategy: product.pricingStrategy ?? null,
+  saleType: product.saleType ?? 'STANDARD',
+  stockQuantity: product.stockQuantity ?? 0,
+  preorderQuota: product.preorderQuota ?? null,
+  paymentMode: product.paymentMode ?? null,
+  depositPercentage: product.depositPercentage ?? null,
+  expressDeliveryAvailable: product.expressDeliveryAvailable ?? false,
+  expressDeliveryFee: product.expressDeliveryFee ?? 0,
+  preorderStartDate: this.toDatetimeLocal(product.preorderStartDate),
+  preorderEndDate: this.toDatetimeLocal(product.preorderEndDate),
+  expectedReleaseDate: this.toDatetimeLocal(product.expectedReleaseDate)
+};
 
     this.imagePreview.set(this.productService.getImageUrl(product.imageUrl));
   }
@@ -318,20 +318,20 @@ export class ProductFormAdminComponent implements OnInit, OnDestroy {
     return new Date(value).toISOString();
   }
 
-  private toDatetimeLocal(value: string | null): string | null {
-    if (!value) return null;
+private toDatetimeLocal(value: string | null | undefined): string | null {
+  if (!value) return null;
 
-    const date = new Date(value);
-    const pad = (n: number) => String(n).padStart(2, '0');
+  const date = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, '0');
 
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
 
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  }
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
 
   private clearSelectedFile(): void {
     this.selectedFile = null;

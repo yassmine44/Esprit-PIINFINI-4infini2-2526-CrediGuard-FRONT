@@ -86,23 +86,23 @@ pricingStrategies = ['MIXED', 'EARLY_BIRD', 'DEMAND_BASED'] as const;
     this.productService.getById(id).subscribe({
       next: (product: Product) => {
         this.form.patchValue({
-          name: product.name ?? '',
-          description: product.description ?? '',
-          categoryId: product.categoryId ?? 0,
-          basePrice: product.basePrice ?? 0,
-          saleType: product.saleType ?? 'STANDARD',
-          stockQuantity: product.stockQuantity ?? 0,
-          preorderQuota: product.preorderQuota ?? 0,
-          dynamicPricingEnabled: product.dynamicPricingEnabled ?? false,
-          pricingStrategy: product.pricingStrategy ?? '',
-          paymentMode: product.paymentMode ?? '',
-          depositPercentage: product.depositPercentage ?? 0,
-          expressDeliveryAvailable: product.expressDeliveryAvailable ?? false,
-          expressDeliveryFee: product.expressDeliveryFee ?? 0,
-          preorderStartDate: product.preorderStartDate ?? '',
-          preorderEndDate: product.preorderEndDate ?? '',
-          expectedReleaseDate: product.expectedReleaseDate ?? ''
-        });
+  name: product.name ?? '',
+  description: product.description ?? '',
+  categoryId: product.categoryId ?? 0,
+  basePrice: product.basePrice ?? 0,
+  saleType: product.saleType === 'PREORDER' ? 'PREORDER' : 'STANDARD',
+  stockQuantity: product.stockQuantity ?? 0,
+  preorderQuota: product.preorderQuota ?? 0,
+  dynamicPricingEnabled: product.dynamicPricingEnabled ?? false,
+  pricingStrategy: product.pricingStrategy ?? '',
+  paymentMode: product.paymentMode ?? '',
+  depositPercentage: product.depositPercentage ?? 0,
+  expressDeliveryAvailable: product.expressDeliveryAvailable ?? false,
+  expressDeliveryFee: product.expressDeliveryFee ?? 0,
+  preorderStartDate: product.preorderStartDate ?? '',
+  preorderEndDate: product.preorderEndDate ?? '',
+  expectedReleaseDate: product.expectedReleaseDate ?? ''
+});
 
         this.selectedImageUrl.set(product.imageUrl ?? null);
         this.imagePreview.set(this.productService.getImageUrl(product.imageUrl));
@@ -191,25 +191,37 @@ pricingStrategies = ['MIXED', 'EARLY_BIRD', 'DEMAND_BASED'] as const;
     return;
   }
 
-  const payload: ProductCreateRequest = {
-    categoryId: raw.categoryId,
-    name: raw.name,
-    description: raw.description || null,
-    basePrice: raw.basePrice,
-    imageUrl: this.selectedImageUrl(),
-    dynamicPricingEnabled: raw.dynamicPricingEnabled,
-    pricingStrategy: raw.pricingStrategy || null,
-    saleType: raw.saleType,
-    stockQuantity: raw.stockQuantity,
-    preorderQuota: isPreorder ? raw.preorderQuota : null,
-    paymentMode: raw.paymentMode || 'CARD',
-    depositPercentage: raw.depositPercentage,
-    expressDeliveryAvailable: raw.expressDeliveryAvailable,
-    expressDeliveryFee: raw.expressDeliveryFee,
-    preorderStartDate: isPreorder ? (raw.preorderStartDate || null) : null,
-    preorderEndDate: isPreorder ? (raw.preorderEndDate || null) : null,
-    expectedReleaseDate: isPreorder ? (raw.expectedReleaseDate || null) : null
-  };
+ const payload: ProductCreateRequest = {
+  categoryId: raw.categoryId,
+  name: raw.name,
+  description: raw.description || null,
+  basePrice: raw.basePrice,
+  imageUrl: this.selectedImageUrl(),
+
+  dynamicPricingEnabled: raw.dynamicPricingEnabled,
+
+  pricingStrategy: raw.pricingStrategy ? raw.pricingStrategy : null,
+
+  saleType: raw.saleType,
+
+  stockQuantity: raw.stockQuantity,
+
+  preorderQuota: isPreorder ? raw.preorderQuota : null,
+
+  paymentMode: raw.paymentMode || 'CARD',
+
+  // 🔥 FIX ICI
+  depositPercentage: raw.depositPercentage
+    ? raw.depositPercentage / 100
+    : null,
+
+  expressDeliveryAvailable: raw.expressDeliveryAvailable,
+  expressDeliveryFee: raw.expressDeliveryFee,
+
+  preorderStartDate: isPreorder ? (raw.preorderStartDate || null) : null,
+  preorderEndDate: isPreorder ? (raw.preorderEndDate || null) : null,
+  expectedReleaseDate: isPreorder ? (raw.expectedReleaseDate || null) : null
+};
 
   console.log('CREATE PRODUCT PAYLOAD =', payload);
 

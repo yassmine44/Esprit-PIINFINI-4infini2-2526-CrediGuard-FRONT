@@ -28,7 +28,7 @@ export class SellerProductsFrontComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.productService.getMine().subscribe({
+    this.productService.getAll().subscribe({
       next: (data) => {
         this.products.set(data);
         this.loading.set(false);

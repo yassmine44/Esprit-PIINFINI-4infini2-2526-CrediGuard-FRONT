@@ -31,13 +31,13 @@ interface ModuleCard {
 interface QuickAction {
   label: string;
   route: string;
-  icon: string;        // ← AJOUTÉ ICI (c'était le problème)
+  icon: string;
 }
 
 @Component({
   selector: 'app-ecommerce',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule,CurrencyPipe],
+  imports: [CommonModule, RouterModule, MatIconModule, CurrencyPipe],
   templateUrl: './ecommerce.component.html',
   styleUrl: './ecommerce.component.scss'
 })
@@ -47,8 +47,8 @@ export class EcommerceComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private financeStatsService = inject(EcommerceFinanceStatsService);
 
-financeOverview = signal<EcommerceFinanceOverview | null>(null);
-financeLoading = signal(false);
+  financeOverview = signal<EcommerceFinanceOverview | null>(null);
+  financeLoading = signal(false);
 
   products = signal<Product[]>([]);
   categories = signal<Category[]>([]);
@@ -133,49 +133,109 @@ financeLoading = signal(false);
       action: 'Manage Deliveries'
     },
     {
+      title: 'Promo Codes',
+      description: 'Create and control promotional codes',
+      icon: 'local_offer',
+      route: '/admin/ecommerce/promo-codes',
+      action: 'Manage Promo Codes'
+    },
+    {
+      title: 'Finance Dashboard',
+      description: 'Analyze revenue, orders, and financial performance',
+      icon: 'insights',
+      route: '/admin/ecommerce/finance-dashboard',
+      action: 'View Finance'
+    },
+    {
+      title: 'Calendar Events',
+      description: 'Manage seasonal events and campaign periods',
+      icon: 'event',
+      route: '/admin/ecommerce/calendar-events',
+      action: 'Manage Events'
+    },
+    {
       title: 'Promotions',
       description: 'Create and manage discount campaigns',
       icon: 'sell',
-      route: '/admin/ecommerce/promo-codes',
+      route: '/admin/ecommerce/promotions',
       action: 'Manage Promotions'
+    },
+    {
+      title: 'Product Requests',
+      description: 'Monitor client requests, offers, and moderation actions',
+      icon: 'request_quote',
+      route: '/admin/ecommerce/product-requests',
+      action: 'Manage Requests'
     }
-    ,
-  {
-  title: 'Finance',
-  description: 'Analyze revenue, orders, and financial performance',
-  icon: 'insights',
-  route: '/admin/ecommerce/finance-dashboard',
-  action: 'View Finance'
-}
   ];
 
   quickActions: QuickAction[] = [
-    { label: 'Add Product',     route: '/admin/ecommerce/products/new',   icon: 'add' },
-    { label: 'View All Products', route: '/admin/ecommerce/products',     icon: 'inventory_2' },
-    { label: 'Manage Categories', route: '/admin/ecommerce/categories',   icon: 'category' },
-    { label: 'View Orders',       route: '/admin/ecommerce/orders',       icon: 'shopping_cart' },
-    { label: 'Promo Codes',       route: '/admin/ecommerce/promo-codes',  icon: 'local_offer' },
-    { label: 'Finance Dashboard', route: '/admin/ecommerce/finance-dashboard', icon: 'insights' },
-  ];
-  loadFinanceOverview(): void {
-  this.financeLoading.set(true);
-
-  this.financeStatsService.getOverview().subscribe({
-    next: (data) => {
-      this.financeOverview.set(data);
-      this.financeLoading.set(false);
+    {
+      label: 'Add Product',
+      route: '/admin/ecommerce/products/new',
+      icon: 'add'
     },
-    error: (err) => {
-      console.error('Error loading finance overview:', err);
-      this.financeLoading.set(false);
+    {
+      label: 'View All Products',
+      route: '/admin/ecommerce/products',
+      icon: 'inventory_2'
+    },
+    {
+      label: 'Manage Categories',
+      route: '/admin/ecommerce/categories',
+      icon: 'category'
+    },
+    {
+      label: 'View Orders',
+      route: '/admin/ecommerce/orders',
+      icon: 'shopping_cart'
+    },
+    {
+      label: 'Promo Codes',
+      route: '/admin/ecommerce/promo-codes',
+      icon: 'local_offer'
+    },
+    {
+      label: 'Finance Dashboard',
+      route: '/admin/ecommerce/finance-dashboard',
+      icon: 'insights'
+    },
+    {
+      label: 'Calendar Events',
+      route: '/admin/ecommerce/calendar-events',
+      icon: 'event'
+    },
+    {
+      label: 'Promotions',
+      route: '/admin/ecommerce/promotions',
+      icon: 'sell'
+    },
+    {
+      label: 'Product Requests',
+      route: '/admin/ecommerce/product-requests',
+      icon: 'request_quote'
     }
-  });
-}
+  ];
 
- ngOnInit(): void {
-  this.loadDashboardData();
-  this.loadFinanceOverview();
-}
+  ngOnInit(): void {
+    this.loadDashboardData();
+    this.loadFinanceOverview();
+  }
+
+  loadFinanceOverview(): void {
+    this.financeLoading.set(true);
+
+    this.financeStatsService.getOverview().subscribe({
+      next: (data) => {
+        this.financeOverview.set(data);
+        this.financeLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading finance overview:', err);
+        this.financeLoading.set(false);
+      }
+    });
+  }
 
   loadDashboardData(): void {
     this.loading.set(true);

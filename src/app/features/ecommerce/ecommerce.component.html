@@ -30,10 +30,10 @@
 
   <!-- KPI Grid with Stagger Animation -->
   <div class="kpi-grid" *ngIf="!loading() && !error()">
-    <div class="kpi-card" 
+    <div class="kpi-card"
          *ngFor="let kpi of kpis(); let i = index"
          [style.animation-delay]="i * 80 + 'ms'">
-      
+
       <div class="kpi-icon-wrapper">
         <mat-icon class="kpi-icon">{{ kpi.icon }}</mat-icon>
       </div>
@@ -48,7 +48,7 @@
     </div>
   </div>
 
-    <!-- Finance Snapshot -->
+  <!-- Finance Snapshot -->
   <div class="dashboard-section finance-section" *ngIf="!loading() && !error()">
     <div class="section-header finance-header">
       <div>
@@ -56,10 +56,11 @@
         <p>Quick financial overview of your e-commerce activity</p>
       </div>
 
-    <a routerLink="/admin/ecommerce/finance-dashboard" class="secondary-btn">
-  <mat-icon>insights</mat-icon>
-  View Full Finance Dashboard
-</a>
+      <a routerLink="/admin/ecommerce/finance-dashboard" class="secondary-btn">
+        <mat-icon>insights</mat-icon>
+        View Full Finance Dashboard
+      </a>
+    </div>
 
     <div *ngIf="financeLoading()" class="mini-loading">
       <p>Loading finance snapshot...</p>
@@ -96,20 +97,20 @@
     </div>
 
     <div class="module-grid">
-      <div class="module-card" 
+      <div class="module-card"
            *ngFor="let module of modules; let i = index"
            [routerLink]="module.route"
            [style.animation-delay]="i * 60 + 'ms'">
-        
+
         <div class="module-icon">
           <mat-icon>{{ module.icon }}</mat-icon>
         </div>
-        
+
         <div class="module-body">
           <h3>{{ module.title }}</h3>
           <p>{{ module.description }}</p>
         </div>
-        
+
         <div class="module-footer">
           <span>{{ module.action }} →</span>
         </div>
@@ -119,17 +120,17 @@
 
   <!-- Bottom Section -->
   <div class="bottom-grid">
-    
+
     <!-- Quick Actions -->
     <div class="quick-actions-card">
       <div class="section-header">
         <h2>Quick Actions</h2>
         <p>Frequently used operations</p>
       </div>
-      
+
       <div class="quick-actions-list">
-        <a *ngFor="let action of quickActions" 
-           [routerLink]="action.route" 
+        <a *ngFor="let action of quickActions"
+           [routerLink]="action.route"
            class="quick-action-item">
           <mat-icon>{{ action.icon }}</mat-icon>
           <span>{{ action.label }}</span>

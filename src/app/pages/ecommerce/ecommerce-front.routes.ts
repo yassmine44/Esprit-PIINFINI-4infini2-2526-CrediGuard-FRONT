@@ -38,7 +38,6 @@ export const ECOMMERCE_FRONT_ROUTES: Routes = [
         .then(m => m.OrderDetailFrontComponent)
   },
 
-
   // seller side in front office
   {
     path: 'seller/products',
@@ -57,5 +56,44 @@ export const ECOMMERCE_FRONT_ROUTES: Routes = [
     loadComponent: () =>
       import('./seller-product-form-front/seller-product-form-front.component')
         .then(m => m.SellerProductFormFrontComponent)
+  },
+
+  // product request
+  {
+    path: 'request-product',
+    loadComponent: () =>
+      import('./request-product-front/request-product-front.component')
+        .then(m => m.RequestProductFrontComponent)
+  },
+  {
+    path: 'my-product-requests',
+    loadComponent: () =>
+      import('./my-product-requests-front/my-product-requests-front.component')
+        .then(m => m.MyProductRequestsFrontComponent)
+  },
+  {
+    path: 'my-product-requests/:id',
+    loadComponent: () =>
+      import('./product-request-detail-front/product-request-detail-front.component')
+        .then(m => m.ProductRequestDetailFrontComponent)
   }
+  ,
+  {
+  path: 'seller/product-requests',
+  loadComponent: () =>
+    import('./seller-product-requests-front/seller-product-requests-front.component')
+      .then(m => m.SellerProductRequestsFrontComponent)
+},
+{
+  path: 'seller/product-requests/:id/respond',
+  loadComponent: () =>
+    import('./seller-request-offer-form-front/seller-request-offer-form-front.component')
+      .then(m => m.SellerRequestOfferFormFrontComponent)
+},
+{
+  path: 'seller/my-request-offers',
+  loadComponent: () =>
+    import('./seller-my-request-offers-front/seller-my-request-offers-front.component')
+      .then(m => m.SellerMyRequestOffersFrontComponent)
+}
 ];

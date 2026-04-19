@@ -104,17 +104,17 @@ export class AuthService {
     return this.http.post<any>(`${this.apiUrl}/verify-otp`, data);
   }
 
-  enable2fa(email: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/enable-2fa?email=${email}`, {});
-  }
+enable2fa(email: string): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/enable-2fa`, { email });
+}
 
-  disable2fa(email: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/disable-2fa?email=${email}`, {});
-  }
+disable2fa(email: string): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/disable-2fa`, { email });
+}
 
-  get2faStatus(email: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/2fa-status?email=${email}`);
-  }
+get2faStatus(email: string): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/2fa-status`, { email });
+}
 
   saveToken(token: string): void {
     this.storage?.setItem(this.tokenKey, token);

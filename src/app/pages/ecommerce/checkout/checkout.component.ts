@@ -1,19 +1,17 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { CartService } from '../services/cart.service';
-import { OrderService } from '../services/order.service';
 import { DeliveryAddressService } from '../services/delivery-address.service';
-import { DeliveryService } from '../services/delivery.service';
+import { CheckoutService } from '../services/checkout.service';
 
 import { Cart } from '../models/cart.model';
-import { OrderCreateRequest } from '../models/order.model';
 import { DeliveryAddressResponse } from '../models/delivery-address.model';
 import { DeliverySlot, DeliveryType } from '../models/delivery.model';
-import { PaymentService } from '../services/payment.service';
 import { PaymentType } from '../models/payment.model';
+import { CheckoutResponse } from '../models/checkout.model';
 
 @Component({
   selector: 'app-checkout',
@@ -24,11 +22,9 @@ import { PaymentType } from '../models/payment.model';
 })
 export class CheckoutComponent implements OnInit {
   private cartService = inject(CartService);
-  private orderService = inject(OrderService);
   private deliveryAddressService = inject(DeliveryAddressService);
-  private deliveryService = inject(DeliveryService);
+  private checkoutService = inject(CheckoutService);
   private router = inject(Router);
-private paymentService = inject(PaymentService);
 
   cart = signal<Cart | null>(null);
   loading = signal(false);
@@ -37,6 +33,7 @@ private paymentService = inject(PaymentService);
   error = signal<string | null>(null);
   successMessage = signal<string | null>(null);
   savedAddress = signal<DeliveryAddressResponse | null>(null);
+  checkoutResult = signal<CheckoutResponse | null>(null);
 
   promoCode = '';
 
@@ -48,8 +45,14 @@ private paymentService = inject(PaymentService);
 
   deliveryType: DeliveryType = 'STANDARD';
   deliverySlot: DeliverySlot = 'MORNING';
-  deliveryFee = 7;
-  paymentType: PaymentType = 'CASH_ON_DELIVERY';
+  paymentType: PaymentType = 'CARD';
+  scheduledAt = '';
+
+  deliveryFee = computed(() => this.deliveryType === 'EXPRESS' ? 15 : 8);
+
+  productsTotal = computed(() => this.cart()?.total ?? 0);
+
+finalTotal = computed(() => this.productsTotal() + this.deliveryFee());
 
   ngOnInit(): void {
     this.loadCart();
@@ -80,6 +83,7 @@ private paymentService = inject(PaymentService);
 
     this.savingAddress.set(true);
     this.error.set(null);
+    this.successMessage.set(null);
 
     this.deliveryAddressService.create({
       fullName: this.fullName.trim(),
@@ -90,6 +94,7 @@ private paymentService = inject(PaymentService);
     }).subscribe({
       next: (address) => {
         this.savedAddress.set(address);
+        this.successMessage.set('Delivery address saved successfully.');
         this.savingAddress.set(false);
       },
       error: (err: unknown) => {
@@ -99,88 +104,51 @@ private paymentService = inject(PaymentService);
       }
     });
   }
-placeOrder(): void {
-  const currentCart = this.cart();
 
-  if (!currentCart || !currentCart.items.length) {
-    this.error.set('Your cart is empty.');
-    return;
-  }
+  placeOrder(): void {
+    const currentCart = this.cart();
+    const address = this.savedAddress();
 
-  if (!this.savedAddress()) {
-    this.error.set('Please save a delivery address.');
-    return;
-  }
-
-  this.placingOrder.set(true);
-  this.error.set(null);
-
-this.orderService.createOrder({
-  promoCode: this.promoCode.trim() || null,
-  items: currentCart.items.map(i => ({
-    productId: i.productId,
-    quantity: i.quantity
-  }))
-}).subscribe({
-    next: (order) => {
-
-      // 🔹 DELIVERY
-      this.deliveryService.create({
-        orderId: order.id,
-        addressId: this.savedAddress()!.id,
-        deliveryType: this.deliveryType,
-        deliverySlot: this.deliverySlot,
-        deliveryFee: this.deliveryFee
-      }).subscribe({
-
-        next: () => {
-
-          // 🔹 PAYMENT
-          this.paymentService.create({
-            orderId: order.id,
-            paymentType: this.paymentType
-          }).subscribe({
-
-            next: () => {
-
-              // 🔹 CLEAR CART
-              this.cartService.clearCart().subscribe({
-                next: () => {
-                  this.successMessage.set('Order completed successfully!');
-                  this.placingOrder.set(false);
-
-                  setTimeout(() => {
-                    this.router.navigate(['/front/orders']);
-                  }, 1200);
-                }
-              });
-
-            },
-
-            error: () => {
-              this.error.set('Payment failed.');
-              this.placingOrder.set(false);
-            }
-
-          });
-
-        },
-
-        error: () => {
-          this.error.set('Delivery failed.');
-          this.placingOrder.set(false);
-        }
-
-      });
-
-    },
-
-    error: () => {
-      this.error.set('Order failed.');
-      this.placingOrder.set(false);
+    if (!currentCart || !currentCart.items.length) {
+      this.error.set('Your cart is empty.');
+      return;
     }
-  });
-}
+
+    if (!address) {
+      this.error.set('Please save a delivery address first.');
+      return;
+    }
+
+    this.placingOrder.set(true);
+    this.error.set(null);
+    this.successMessage.set(null);
+
+    this.checkoutService.checkout({
+      addressId: address.id,
+      paymentType: this.paymentType,
+      deliveryType: this.deliveryType,
+      deliverySlot: this.deliverySlot,
+      scheduledAt: this.scheduledAt ? this.scheduledAt : null,
+      promoCode: this.promoCode.trim() || null
+    }).subscribe({
+      next: (result) => {
+        this.checkoutResult.set(result);
+        this.successMessage.set('Checkout completed successfully.');
+        this.placingOrder.set(false);
+
+        this.loadCart();
+
+        setTimeout(() => {
+          this.router.navigate(['/front/orders']);
+        }, 1200);
+      },
+      error: (err: any) => {
+        console.error('Checkout failed:', err);
+        this.error.set(err?.error?.message || 'Checkout failed.');
+        this.placingOrder.set(false);
+      }
+    });
+  }
 
   getImageUrl(imageUrl?: string | null): string {
     if (!imageUrl || !imageUrl.trim()) {
@@ -204,4 +172,5 @@ this.orderService.createOrder({
     const img = event.target as HTMLImageElement;
     img.src = 'assets/default-product.png';
   }
+  
 }
