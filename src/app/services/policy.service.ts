@@ -25,7 +25,7 @@ export interface Policy {
 })
 export class PolicyService {
 
-  private api = 'http://localhost:8090/api/insurance/policies';
+  private api = 'http://localhost:8089/api/insurance/policies';
 
   constructor(private http: HttpClient) {}
 
@@ -49,6 +49,6 @@ export class PolicyService {
     return this.http.delete<any>(`${this.api}/${id}`);
   }
   getByClient(clientId: number) {
-  return this.http.get(`http://localhost:8090/insurance/policies/by-client/${clientId}`);
+  return this.http.get(`http://localhost:8089/insurance/policies/by-client/${clientId}`);
 }
 }

@@ -25,7 +25,7 @@ export class PartnershipComponent implements OnInit {
   private http = inject(HttpClient);
   private claimsService = inject(ClaimsAdminService);
 
-  private api = 'http://localhost:8090/api/api/vouchers';
+  private api = 'http://localhost:8089/api/api/vouchers';
 
   partnerTypes = ['Produits', 'Equipement', 'Services'];
   partners: any[] = [];
@@ -60,7 +60,7 @@ export class PartnershipComponent implements OnInit {
     const token = this.authService.getToken();
 
     this.http.get(
-      `http://localhost:8090/api/insurance/policies/by-client/${user.id}`,
+      `http://localhost:8089/api/insurance/policies/by-client/${user.id}`,
       { headers: { Authorization: `Bearer ${token}` } }
     ).subscribe({
       next: (res: any) => {
@@ -187,7 +187,7 @@ if (!user?.id) {
 
 const clientId = user.id;
 
-      return fetch(`http://localhost:8090/api/insurance/policies/by-client/${clientId}`, {
+      return fetch(`http://localhost:8089/api/insurance/policies/by-client/${clientId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => {
@@ -209,7 +209,7 @@ const clientId = user.id;
           claimReference: `CLAIM-${v.id}-${Date.now()}`
         };
 
-        return fetch('http://localhost:8090/api/insurance/claims/create', {
+        return fetch('http://localhost:8089/api/insurance/claims/create', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
