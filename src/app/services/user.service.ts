@@ -8,6 +8,7 @@ export interface User {
   partnerType: string;
 }
 
+
 @Injectable({
   providedIn: 'root'
 })

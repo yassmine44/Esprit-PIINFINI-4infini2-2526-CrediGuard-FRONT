@@ -11,6 +11,15 @@ export interface User {
   enabled?: boolean;
 }
 
+export interface UserProfileResponse {
+  id?: number;
+  fullName: string;
+  email: string;
+  phone?: string;
+  userType?: string;
+  enabled?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,6 +30,10 @@ export class UserService {
 
   getUsers() {
     return this.http.get<User[]>(this.apiUrl);
+  }
+
+  getMyProfile() {
+    return this.http.get<UserProfileResponse>(`${this.apiUrl}/me`);
   }
 
   deleteUser(id: number) {

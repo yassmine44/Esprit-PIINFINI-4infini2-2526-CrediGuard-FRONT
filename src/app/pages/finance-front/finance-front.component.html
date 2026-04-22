@@ -1,5 +1,9 @@
 <div class="finance-container">
 
+    <div class="api-feedback success" *ngIf="apiMessage()">{{ apiMessage() }}</div>
+    <div class="api-feedback error" *ngIf="apiError()">{{ apiError() }}</div>
+    <div class="api-feedback loading" *ngIf="loadingApi()">Chargement des donnees backend...</div>
+
     <!-- STATE 1: CREATE ACCOUNT FORM -->
     <div *ngIf="!hasAccount()" class="create-account-form-container fade-in">
         <header class="section-header">
@@ -10,39 +14,70 @@
         <div class="form-card">
             <div class="input-group">
                 <label>Nom</label>
-                <input type="text" [(ngModel)]="accountForm.lastName" placeholder="Votre nom">
+                <input type="text" [(ngModel)]="accountForm.lastName" (ngModelChange)="clearAccountFieldError('lastName')"
+                    [class.input-invalid]="accountFormErrors().lastName" placeholder="Votre nom">
+                <small class="field-error" *ngIf="accountFormErrors().lastName">{{ accountFormErrors().lastName }}</small>
             </div>
             <div class="input-group">
                 <label>Prénom</label>
-                <input type="text" [(ngModel)]="accountForm.firstName" placeholder="Votre prénom">
+                <input type="text" [(ngModel)]="accountForm.firstName" (ngModelChange)="clearAccountFieldError('firstName')"
+                    [class.input-invalid]="accountFormErrors().firstName" placeholder="Votre prénom">
+                <small class="field-error" *ngIf="accountFormErrors().firstName">{{ accountFormErrors().firstName }}</small>
             </div>
             <div class="input-group">
                 <label>Email</label>
-                <input type="email" [(ngModel)]="accountForm.email" placeholder="exemple@email.com">
+                <input type="email" [(ngModel)]="accountForm.email" (ngModelChange)="clearAccountFieldError('email')"
+                    [class.input-invalid]="accountFormErrors().email" placeholder="exemple@email.com">
+                <small class="field-error" *ngIf="accountFormErrors().email">{{ accountFormErrors().email }}</small>
             </div>
             <div class="input-group">
                 <label>Téléphone</label>
-                <input type="tel" [(ngModel)]="accountForm.phone" placeholder="+216 00 000 000">
+                <input type="tel" [(ngModel)]="accountForm.phone" (ngModelChange)="clearAccountFieldError('phone')"
+                    [class.input-invalid]="accountFormErrors().phone" placeholder="+216 00 000 000">
+                <small class="field-error" *ngIf="accountFormErrors().phone">{{ accountFormErrors().phone }}</small>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Solde initial</label>
+                    <input type="number" min="0" [(ngModel)]="accountForm.initialBalance"
+                        (ngModelChange)="clearAccountFieldError('initialBalance')"
+                        [class.input-invalid]="accountFormErrors().initialBalance" placeholder="0">
+                    <small class="field-error" *ngIf="accountFormErrors().initialBalance">{{ accountFormErrors().initialBalance }}</small>
+                </div>
+                <div class="input-group">
+                    <label>Type de Compte</label>
+                    <select [(ngModel)]="accountForm.typeCompte" (ngModelChange)="clearAccountFieldError('typeCompte')"
+                        [class.input-invalid]="accountFormErrors().typeCompte">
+                        <option value="BENEFICIAIRE">Beneficiaire</option>
+                        <option value="PARTENAIRE">Partenaire</option>
+                        <option value="PLATEFORME">Plateforme</option>
+                    </select>
+                    <small class="field-error" *ngIf="accountFormErrors().typeCompte">{{ accountFormErrors().typeCompte }}</small>
+                </div>
             </div>
 
             <div class="input-row">
                 <div class="input-group">
                     <label>Type d'Identité</label>
-                    <select [(ngModel)]="accountForm.idType">
+                    <select [(ngModel)]="accountForm.idType" (ngModelChange)="clearAccountFieldError('idType')"
+                        [class.input-invalid]="accountFormErrors().idType">
                         <option value="CIN">CIN</option>
                         <option value="Passeport">Passeport</option>
                     </select>
+                    <small class="field-error" *ngIf="accountFormErrors().idType">{{ accountFormErrors().idType }}</small>
                 </div>
                 <div class="input-group">
                     <label>Document d'Identité</label>
-                    <div class="file-upload">
-                        <span>📄 Télécharger fichier</span>
-                        <!-- Mock file input -->
-                    </div>
+                    <label class="file-upload" [class.input-invalid]="accountFormErrors().idFile">
+                        <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="onIdFileSelected($event)">
+                        <span>{{ accountForm.idFile ? accountForm.idFile.name : 'Telecharger fichier' }}</span>
+                    </label>
+                    <small class="field-error" *ngIf="accountFormErrors().idFile">{{ accountFormErrors().idFile }}</small>
                 </div>
             </div>
 
-            <button class="btn-submit" (click)="createAccount()">CRÉER MON COMPTE</button>
+            <button class="btn-submit" [disabled]="loadingApi()" (click)="createAccount()">CRÉER MON COMPTE</button>
 
             <div class="login-link-container">
                 <a routerLink="/auth/sign-in" class="login-link">Se connecter</a>
@@ -58,6 +93,27 @@
             <h2>Tableau de Bord Financier</h2>
             <!-- <p>Bienvenue, {{ user().nom }}</p> -->
         </header>
+
+        <div class="header-actions">
+            <button class="btn-submit small" (click)="refreshTransactions()">Rafraichir transactions</button>
+            <button class="btn-submit small secondary" (click)="updateCurrentBalance()">Mettre a jour solde</button>
+            <button class="btn-submit small danger" (click)="openDeleteAccountModal()">Supprimer compte</button>
+        </div>
+
+        <div class="account-overview">
+            <div class="account-chip">
+                <span>Compte</span>
+                <strong>#{{ account().id_compte }}</strong>
+            </div>
+            <div class="account-chip balance">
+                <span>Solde actuel</span>
+                <strong>{{ account().solde | currency:'TND':'code':'1.2-2' }}</strong>
+            </div>
+            <div class="account-chip">
+                <span>Type</span>
+                <strong>{{ account().type_compte }}</strong>
+            </div>
+        </div>
 
         <div class="useful-links">
             <div class="link-card">
@@ -148,7 +204,7 @@
             </div>
         </section>
 
-        <!-- Existing Transactions Table -->
+        <!-- Transactions CRUD Table -->
         <section class="transactions-section">
             <div class="section-header-row">
                 <h3>Transactions des Clients</h3>
@@ -162,6 +218,37 @@
                         <option value="Annulé">Annulé</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="crud-toolbar">
+                <div class="crud-form-grid">
+                    <select [(ngModel)]="transactionForm.typeTransaction">
+                        <option value="VENTE">VENTE</option>
+                        <option value="ACHAT">ACHAT</option>
+                        <option value="REMBOURSEMENT">REMBOURSEMENT</option>
+                    </select>
+                    <input type="number" min="0.01" step="0.01" [(ngModel)]="transactionForm.montant" placeholder="Montant">
+                    <div class="crud-field with-label">
+                        <label class="crud-inline-label">Compte destination</label>
+                        <input type="number" min="1" [(ngModel)]="transactionForm.compteDestinationId" placeholder="ID compte destination">
+                    </div>
+                    <input type="number" min="1" [(ngModel)]="transactionForm.orderId" placeholder="Order ID (optionnel)">
+                    <select [(ngModel)]="transactionForm.statut" *ngIf="editingTransactionId !== null">
+                        <option value="COMPLETED">COMPLETED</option>
+                        <option value="PENDING">PENDING</option>
+                        <option value="FAILED">FAILED</option>
+                    </select>
+                </div>
+                <div class="crud-actions">
+                    <button class="btn-submit small" (click)="submitTransaction()">
+                        {{ editingTransactionId !== null ? 'Mettre a jour transaction' : 'Creer transaction' }}
+                    </button>
+                    <button class="btn-submit small secondary" *ngIf="editingTransactionId !== null"
+                        (click)="cancelTransactionEdit()">
+                        Annuler edition
+                    </button>
+                </div>
+                <div class="inline-error" *ngIf="transactionFormError()">{{ transactionFormError() }}</div>
             </div>
 
             <div class="table-container">
@@ -178,7 +265,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let t of filteredTransactions()">
+                        <tr *ngFor="let t of filteredTransactions">
                             <td class="id-col">{{ t.id_transaction_str }}</td>
                             <td class="client-col">
                                 <span class="avatar-placeholder">{{ t.client.charAt(0) }}</span>
@@ -199,14 +286,139 @@
                                 </span>
                             </td>
                             <td class="actions-col">
-                                <button class="btn-icon view" title="Voir">👁️</button>
-                                <button class="btn-icon download" title="Télécharger">⬇️</button>
+                                <button class="btn-icon view" title="Voir" (click)="viewTransaction(t.id_transaction)">👁️</button>
+                                <button class="btn-icon download" title="Editer" (click)="startEditTransaction(t)">✎</button>
+                                <button class="btn-icon danger" title="Supprimer" (click)="deleteTransaction(t)">🗑️</button>
                             </td>
+                        </tr>
+                        <tr *ngIf="filteredTransactions.length === 0">
+                            <td colspan="7" class="empty-row">Aucune transaction trouvee.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
+            <div class="selected-transaction" *ngIf="selectedTransaction as tx">
+                <h4>Detail transaction selectionnee</h4>
+                <p><strong>ID:</strong> {{ tx.idTransaction }}</p>
+                <p><strong>Type:</strong> {{ tx.typeTransaction }}</p>
+                <p><strong>Montant:</strong> {{ tx.montant | currency:'TND':'code':'1.2-2' }}</p>
+                <p><strong>Date:</strong> {{ tx.dateTransaction | date:'dd/MM/yyyy HH:mm' }}</p>
+                <p><strong>Statut:</strong> {{ tx.statut }}</p>
+            </div>
         </section>
+
+        <section class="api-tools-section">
+            <h3>Operations Credit (API Remboursements et Regles)</h3>
+
+            <div class="credits-palette" *ngIf="availableCredits().length > 0">
+                <span>Credits disponibles:</span>
+                <button
+                    type="button"
+                    class="credit-pill"
+                    *ngFor="let credit of availableCredits()"
+                    (click)="chooseCredit(credit.id)">
+                    #{{ credit.id }} (reste {{ credit.montantRestant | number:'1.0-0' }})
+                </button>
+            </div>
+
+            <div class="api-tools-filter">
+                <input type="number" min="1" [(ngModel)]="selectedCreditId" placeholder="Credit ID">
+                <button class="btn-submit small" (click)="loadCreditOperations()">Charger par Credit ID</button>
+            </div>
+
+            <div class="api-card remboursement-crud-card">
+                <h4>Tableau CRUD Remboursements</h4>
+                <div class="crud-form-grid">
+                    <input type="number" min="1" [(ngModel)]="remboursementForm.creditId" placeholder="Credit ID">
+                    <input type="number" min="0.01" step="0.01" [(ngModel)]="remboursementForm.montant" placeholder="Montant">
+                    <input type="text" [(ngModel)]="remboursementForm.mode" placeholder="Mode (automatique)">
+                    <input type="number" min="1" [(ngModel)]="remboursementForm.transactionId" placeholder="Transaction ID (optionnel)">
+                </div>
+                <div class="crud-actions">
+                    <button class="btn-submit small" (click)="submitRemboursement()">
+                        {{ editingRemboursementId !== null ? 'Mettre a jour remboursement' : 'Creer remboursement' }}
+                    </button>
+                    <button class="btn-submit small secondary" *ngIf="editingRemboursementId !== null"
+                        (click)="cancelRemboursementEdit()">
+                        Annuler edition
+                    </button>
+                </div>
+                <div class="inline-error" *ngIf="remboursementFormError()">{{ remboursementFormError() }}</div>
+
+                <div class="table-container">
+                    <table class="transactions-table remboursements-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>CREDIT</th>
+                                <th>MONTANT</th>
+                                <th>MODE</th>
+                                <th>DATE</th>
+                                <th>TRANSACTION</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let rem of displayedRemboursements">
+                                <td class="id-col">#{{ rem.idRemboursement }}</td>
+                                <td>#{{ rem.creditId }}</td>
+                                <td>{{ rem.montant | currency:'TND':'code':'1.2-2' }}</td>
+                                <td>{{ rem.mode }}</td>
+                                <td>{{ rem.dateRemboursement | date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td>{{ rem.transactionId ?? '-' }}</td>
+                                <td class="actions-col">
+                                    <button class="btn-icon view" title="Voir"
+                                        (click)="viewRemboursement(rem.idRemboursement)">👁️</button>
+                                    <button class="btn-icon download" title="Editer"
+                                        (click)="startEditRemboursement(rem)">✎</button>
+                                    <button class="btn-icon danger" title="Supprimer"
+                                        (click)="deleteRemboursement(rem)">🗑️</button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="displayedRemboursements.length === 0">
+                                <td colspan="7" class="empty-row">Aucun remboursement trouve.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="api-tools-grid">
+                <div class="api-card">
+                    <h4>Regles de Remboursement</h4>
+                    <input type="number" min="1" [(ngModel)]="regleForm.creditId" placeholder="Credit ID">
+                    <select [(ngModel)]="regleForm.typeRegle">
+                        <option value="POURCENTAGE_SUR_VENTE">POURCENTAGE_SUR_VENTE</option>
+                        <option value="MONTANT_FIXE">MONTANT_FIXE</option>
+                    </select>
+                    <input type="number" min="0.01" step="0.01" [(ngModel)]="regleForm.valeur" placeholder="Valeur">
+                    <button class="btn-submit small" (click)="createRegle()">Creer regle</button>
+
+                    <div class="api-list" *ngIf="reglesApi().length > 0">
+                        <div class="api-list-item" *ngFor="let regle of reglesApi()">
+                            <span>#{{ regle.idRegle }} - {{ regle.typeRegle }} ({{ regle.valeur }})</span>
+                            <div class="inline-actions">
+                                <button class="btn-icon view" (click)="viewRegle(regle.idRegle)">👁️</button>
+                                <button class="btn-icon download" (click)="updateRegle(regle)">✎</button>
+                                <button class="btn-icon" (click)="deleteRegle(regle)">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="modal-overlay" *ngIf="deleteDialog().open">
+            <div class="confirm-modal">
+                <h4>{{ deleteDialog().title || 'Confirmer la suppression' }}</h4>
+                <p>{{ deleteDialog().description }}</p>
+                <div class="modal-actions">
+                    <button class="btn-submit small secondary" (click)="cancelDeleteAccount()">Annuler</button>
+                    <button class="btn-submit small danger" (click)="confirmDeleteCurrentAccount()">Supprimer</button>
+                </div>
+            </div>
+        </div>
 
     </div>
 

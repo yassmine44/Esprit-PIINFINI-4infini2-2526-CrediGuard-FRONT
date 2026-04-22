@@ -171,7 +171,7 @@ export const routes: Routes = [
         path: 'finance',
         loadComponent: () =>
           import('./features/finance/finance.component')
-            .then(m => m.FinanceComponent)
+        .then(m => m.FinanceAdminComponent)
       },
 
       // ✅ VERSION YASSMINE (plus modulaire)
