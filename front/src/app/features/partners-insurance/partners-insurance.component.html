@@ -1,0 +1,42 @@
+<div class="module-page">
+  <div class="module-header">
+    <div>
+      <h1>Partners & Insurance Management</h1>
+      <p>Manage partners, contracts, insurance products, claims, and guarantees.</p>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Total Partners</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Insurance Products</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Open Claims</span>
+      <h2>0</h2>
+    </div>
+
+    <div class="summary-card">
+      <span>Active Contracts</span>
+      <h2>0</h2>
+    </div>
+  </div>
+
+  <div class="module-grid">
+    <div class="module-card" *ngFor="let card of cards">
+      <div class="card-top">
+        <h3>{{ card.title }}</h3>
+        <span class="card-badge">{{ card.value }}</span>
+      </div>
+
+      <p>{{ card.description }}</p>
+      <button type="button">{{ card.action }}</button>
+    </div>
+  </div>
+</div>

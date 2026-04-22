@@ -1,0 +1,20 @@
+<div class="chatbot-container" [class.open]="isOpen">
+    <div class="chatbot-header" (click)="toggleChat()">
+        <span>Assistant Finance</span>
+        <button class="close-btn" *ngIf="isOpen">×</button>
+        <span class="icon" *ngIf="!isOpen">💬</span>
+    </div>
+
+    <div class="chatbot-body" *ngIf="isOpen" #scrollContainer>
+        <div *ngFor="let msg of messages" class="message" [class.user]="msg.sender === 'user'"
+            [class.bot]="msg.sender === 'bot'">
+            <div class="message-content">{{ msg.text }}</div>
+            <div class="message-time">{{ msg.time | date:'shortTime' }}</div>
+        </div>
+    </div>
+
+    <div class="chatbot-footer" *ngIf="isOpen">
+        <input [(ngModel)]="userInput" (keyup.enter)="sendMessage()" placeholder="Posez une question..." type="text" />
+        <button (click)="sendMessage()">➤</button>
+    </div>
+</div>
