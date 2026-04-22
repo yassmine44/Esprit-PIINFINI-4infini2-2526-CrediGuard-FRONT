@@ -21,7 +21,8 @@ interface PendingOtpAuth {
 })
 export class AuthService {
 
-  private apiUrl = 'http://localhost:8090/api/auth';
+  private apiUrl = 'http://localhost:8089/api/auth';
+
   private readonly tokenKey = 'accessToken';
   private readonly userKey = 'currentUser';
   private readonly emailKey = 'userEmail';
@@ -36,76 +37,41 @@ export class AuthService {
     return isPlatformBrowser(this.platformId) ? localStorage : null;
   }
 
-  private normalizeUserType(value: unknown): string | null {
-    if (typeof value !== 'string') return null;
-    const normalized = value.trim().toUpperCase();
-    return normalized || null;
-  }
-
-  private buildStoredUser(user: unknown, fallback: Partial<AuthUser> = {}): AuthUser | null {
-    const source = typeof user === 'object' && user !== null ? { ...(user as AuthUser) } : {};
-
-    const id =
-      typeof source.id === 'number' ? source.id :
-      typeof fallback.id === 'number' ? fallback.id : undefined;
-
-    const email =
-      typeof source.email === 'string' ? source.email :
-      typeof fallback.email === 'string' ? fallback.email : undefined;
-
-    const userType = this.normalizeUserType(
-      source.userType ?? source.role ?? fallback.userType ?? fallback.role
-    );
-
-    if (Object.keys(source).length === 0 && id === undefined && !email && !userType) return null;
-
-    return {
-      ...source,
-      ...(id !== undefined ? { id } : {}),
-      ...(email ? { email } : {}),
-      ...(userType ? { userType, role: userType } : {})
-    };
-  }
-
-  getUserTypeFromAuthResponse(response: any): string | null {
-    return this.normalizeUserType(
-      response?.user?.userType ?? response?.user?.role ??
-      response?.currentUser?.userType ?? response?.currentUser?.role ??
-      response?.userType ?? response?.role
-    );
-  }
+  // ================= AUTH API =================
 
   login(data: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, data);
+    return this.http.post(`${this.apiUrl}/login`, data);
   }
 
   register(data: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, data);
+    return this.http.post(`${this.apiUrl}/register`, data);
   }
 
   forgotPassword(data: { email: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/forgot-password`, data);
+    return this.http.post(`${this.apiUrl}/forgot-password`, data);
   }
 
   resetPassword(data: { token: string; newPassword: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/reset-password`, data);
+    return this.http.post(`${this.apiUrl}/reset-password`, data);
   }
 
   verifyOtp(data: { email: string; otp: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/verify-otp`, data);
+    return this.http.post(`${this.apiUrl}/verify-otp`, data);
   }
 
   enable2fa(email: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/enable-2fa?email=${email}`, {});
+    return this.http.post(`${this.apiUrl}/enable-2fa?email=${email}`, {});
   }
 
   disable2fa(email: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/disable-2fa?email=${email}`, {});
+    return this.http.post(`${this.apiUrl}/disable-2fa?email=${email}`, {});
   }
 
   get2faStatus(email: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/2fa-status?email=${email}`);
+    return this.http.get(`${this.apiUrl}/2fa-status?email=${email}`);
   }
+
+  // ================= TOKEN =================
 
   saveToken(token: string): void {
     this.storage?.setItem(this.tokenKey, token);
@@ -115,36 +81,96 @@ export class AuthService {
     return this.storage?.getItem(this.tokenKey) ?? null;
   }
 
-  saveUser(user: unknown, fallback: Partial<AuthUser> = {}): AuthUser | null {
-    const normalizedUser = this.buildStoredUser(user, fallback);
-    if (!normalizedUser) {
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  // ================= USER NORMALIZATION =================
+
+  private normalizeUserType(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    return value.trim().toUpperCase();
+  }
+
+  private buildStoredUser(user: unknown, fallback: Partial<AuthUser> = {}): AuthUser | null {
+    const source = typeof user === 'object' && user !== null
+      ? { ...(user as AuthUser) }
+      : {};
+
+    const id =
+      typeof source.id === 'number'
+        ? source.id
+        : typeof fallback.id === 'number'
+          ? fallback.id
+          : undefined;
+
+    const email =
+      typeof source.email === 'string'
+        ? source.email
+        : typeof fallback.email === 'string'
+          ? fallback.email
+          : undefined;
+
+    const userType = this.normalizeUserType(
+      source.userType ?? source.role ?? fallback.userType ?? fallback.role
+    );
+
+    if (!id && !email && !userType && Object.keys(source).length === 0) {
+      return null;
+    }
+
+    return {
+      ...source,
+      ...(id !== undefined ? { id } : {}),
+      ...(email ? { email } : {}),
+      ...(userType ? { userType, role: userType } : {})
+    };
+  }
+
+  getUser(): AuthUser | null {
+    const raw = this.storage?.getItem(this.userKey);
+    if (!raw) return null;
+
+    try {
+      return JSON.parse(raw);
+    } catch {
       this.storage?.removeItem(this.userKey);
       return null;
     }
-    this.storage?.setItem(this.userKey, JSON.stringify(normalizedUser));
-    return normalizedUser;
+  }
+
+  saveUser(user: unknown, fallback: Partial<AuthUser> = {}): AuthUser | null {
+    const normalized = this.buildStoredUser(user, fallback);
+
+    if (!normalized) {
+      this.storage?.removeItem(this.userKey);
+      return null;
+    }
+
+    this.storage?.setItem(this.userKey, JSON.stringify(normalized));
+    return normalized;
   }
 
   saveUserFromAuthResponse(response: any, fallbackEmail?: string): AuthUser | null {
     return this.saveUser(
-      response?.user ?? response?.currentUser ?? null,
+      response?.user ?? response?.currentUser ?? response,
       {
-        id: response?.user?.id ?? response?.currentUser?.id ?? response?.id,
+        id: response?.id ?? response?.user?.id,
         email: response?.email ?? fallbackEmail,
         userType: this.getUserTypeFromAuthResponse(response)
       }
     );
   }
 
-  getUser(): AuthUser | null {
-    const rawUser = this.storage?.getItem(this.userKey);
-    if (!rawUser) return null;
-    try {
-      return JSON.parse(rawUser) as AuthUser;
-    } catch {
-      this.storage?.removeItem(this.userKey);
-      return null;
-    }
+  getUserTypeFromAuthResponse(response: any): string | null {
+    return this.normalizeUserType(
+      response?.user?.userType ??
+      response?.user?.role ??
+      response?.currentUser?.userType ??
+      response?.currentUser?.role ??
+      response?.userType ??
+      response?.role
+    );
   }
 
   getUserType(): string | null {
@@ -156,35 +182,40 @@ export class AuthService {
     return this.getUserType() === 'ADMIN';
   }
 
+  // ================= EMAIL =================
+
   saveUserEmail(email: string): void {
     this.storage?.setItem(this.emailKey, email);
   }
 
   getUserEmail(): string | null {
-    return this.storage?.getItem(this.emailKey) ?? null;
+    const email = this.storage?.getItem(this.emailKey);
+    return email ?? null;
   }
+
+  // ================= OTP =================
 
   savePendingOtpAuth(response: any, fallbackEmail: string): void {
     const email = response?.email || fallbackEmail;
-    const user = this.buildStoredUser(
-      response?.user ?? response?.currentUser ?? null,
-      {
-        id: response?.user?.id ?? response?.currentUser?.id ?? response?.id,
-        email,
-        userType: this.getUserTypeFromAuthResponse(response)
-      }
-    );
+
+    const user = this.buildStoredUser(response?.user ?? response?.currentUser, {
+      id: response?.user?.id ?? response?.currentUser?.id,
+      email,
+      userType: this.getUserTypeFromAuthResponse(response)
+    });
+
     this.storage?.setItem(
       this.pendingOtpKey,
-      JSON.stringify({ email, user } satisfies PendingOtpAuth)
+      JSON.stringify({ email, user })
     );
   }
 
   getPendingOtpAuth(): PendingOtpAuth | null {
-    const rawPendingAuth = this.storage?.getItem(this.pendingOtpKey);
-    if (!rawPendingAuth) return null;
+    const raw = this.storage?.getItem(this.pendingOtpKey);
+    if (!raw) return null;
+
     try {
-      return JSON.parse(rawPendingAuth) as PendingOtpAuth;
+      return JSON.parse(raw);
     } catch {
       this.storage?.removeItem(this.pendingOtpKey);
       return null;
@@ -195,6 +226,8 @@ export class AuthService {
     this.storage?.removeItem(this.pendingOtpKey);
   }
 
+  // ================= SESSION =================
+
   clearSession(): void {
     this.storage?.removeItem(this.tokenKey);
     this.storage?.removeItem(this.userKey);
@@ -204,9 +237,5 @@ export class AuthService {
 
   logout(): void {
     this.clearSession();
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.getToken();
   }
 }
